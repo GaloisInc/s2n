@@ -244,10 +244,9 @@ bitcode/all_llvm.bc : s2n/crypto s2n/pq-crypto s2n/pq-crypto/sike s2n/utils s2n/
 	${MAKE} -C bitcode all_llvm.bc
 
 bitcode/sike_llvm.bc : s2n/crypto s2n/pq-crypto s2n/pq-crypto/sike s2n/utils s2n/tls s2n/api s2n/error s2n/stuffer s2n/Makefile s2n/s2n.mk $(CRYPTO_COPY) $(PQ_CRYPTO_COPY) $(SIKE_COPY) $(UTILS_COPY) $(TLS_COPY) $(API_COPY) $(ERROR_COPY) $(STUFFER_COPY)
-	patch s2n/pq-crypto/sike/api.h sike/patch/api.h.patch
+	patch s2n/pq-crypto/sike/fpx.c sike/patch/fpx.c.patch
 	patch s2n/pq-crypto/sike/ec_isogeny.c sike/patch/ec_isogeny.c.patch
 	patch s2n/pq-crypto/sike/sidh.c sike/patch/sidh.c.patch
-	patch s2n/pq-crypto/sike/sike_p503_kem.c sike/patch/sike_p503_kem.c.patch
 	${MAKE} -C s2n bc
 	${MAKE} -C bitcode all_llvm.bc
 
