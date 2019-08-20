@@ -188,7 +188,7 @@ bitcode/%.bc : failure_tests/%.patch
 
 #if we ask this makefile to create bitcode it will always completely rebuild it
 .PHONY : bitcode
-bitcode : 
+bitcode :
 	${MAKE} clean_the_dir
 	${MAKE} bitcode/all_llvm.bc
 
@@ -277,7 +277,6 @@ bitcode/sike_llvm.bc : s2n/crypto s2n/pq-crypto s2n/pq-crypto/sike s2n/utils s2n
 
 .PHONY : bitcode/bike_llvm.bc
 bitcode/bike_llvm.bc : s2n/crypto s2n/pq-crypto s2n/pq-crypto/bike s2n/utils s2n/tls s2n/api s2n/error s2n/stuffer s2n/Makefile s2n/s2n.mk $(CRYPTO_COPY) $(PQ_CRYPTO_COPY) $(BIKE_COPY) $(UTILS_COPY) $(TLS_COPY) $(API_COPY) $(ERROR_COPY) $(STUFFER_COPY)
-# bitcode/bike_llvm.bc : 
 	patch s2n/pq-crypto/bike/bike_defs.h bike/patch/bike_defs.h.patch
 	patch s2n/pq-crypto/bike/bike1_l1_kem.c bike/patch/bike1_l1_kem.c.patch
 	patch s2n/pq-crypto/bike/types.h bike/patch/types.h.patch
