@@ -33,7 +33,7 @@ The code in the pq-crypto/bike directory was taken from the [additional implemen
 s2n uses the "additional implementation" which ensures constant time primitives, does not use any external libraries
 besides libcrypto, and does not depend on any specific hardware instructions to ensure maximum comparability and ease of
 review. The known answer tests are [here](https://github.com/awslabs/s2n/blob/master/tests/unit/s2n_bike1_l1_kat_test.c)
-and use the BIKE1_L1.const.kat from the above Additional_Implementation.2019.03.30.zip.
+and use the BIKE1_L1.const.kat from the above Additional_Implementation.2019.03.30.zip. This implementation uses constant time primitives on x86 and aarch64 platforms.
 
 ## How to add another PQ KEM
 1. Add the code to `pq-crypto/KEM_NAME/`
@@ -67,6 +67,5 @@ s2nd --cert ${PATH_TO_S2N}/tests/pems/rsa_2048_sha256_wildcard_cert.pem --key ${
 export PATH_TO_S2N=/path/to/s2n
 export LD_LIBRARY_PATH=${PATH_TO_S2N}/test-deps/openssl-1.1.1/lib:${PATH_TO_S2N}/test-deps/openssl-1.1.1/lib:${PATH_TO_S2N}/lib:${PATH_TO_S2N}/bin
 export PATH=${PATH_TO_S2N}/bin:$PATH
-export S2N_ENABLE_CLIENT_MODE=1
 s2nc -i --ciphers KMS-PQ-TLS-1-0-2019-06 0.0.0.0 8888
 ```

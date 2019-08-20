@@ -22,10 +22,16 @@ BCS1=$(addprefix $(BITCODE_DIR), $(BCS_11))
 all: $(OBJS)
 	$(MAKE) -C bike
 	$(MAKE) -C sike
+	${CC} -shared -o libs2n_pq_crypto.so ${OBJS} -Wl,--whole-archive ${INTERNAL_LIBS} -Wl,--no-whole-archive -L../../ ${CFLAGS} ${LDFLAGS} -lm
 
-.PHONY : bc
-bc: $(BCS1)
+
+.PHONY : sike_bc
+sike_bc: $(BCS1)
 	$(MAKE) -C sike bc
+
+.PHONY : bike_bc
+bike_bc: $(BCS1)
+	$(MAKE) -C bike bc
 
 .PHONY : run-gcov
 run-gcov: gcov

@@ -27,6 +27,7 @@
 #include "tls/s2n_client_extensions.h"
 #include "tls/s2n_resume.h"
 
+#include "extensions/s2n_client_supported_versions.h"
 #include "stuffer/s2n_stuffer.h"
 
 #include "tls/s2n_tls.h"
@@ -104,25 +105,37 @@ int s2n_client_extensions_send(struct s2n_connection *conn, struct s2n_stuffer *
     const struct s2n_cipher_preferences *cipher_preferences;
     GUARD(s2n_connection_get_cipher_preferences(conn, &cipher_preferences));
 
-    if (s2n_is_ecc_enabled(cipher_preferences)) {
+    const uint8_t ecc_extension_required = s2n_ecc_extension_required(cipher_preferences);
+    if (ecc_extension_required) {
         /* Write ECC extensions: Supported Curves and Supported Point Formats */
         int ec_curves_count = s2n_array_len(s2n_ecc_supported_curves);
         total_size += 12 + ec_curves_count * 2;
     }
 
-    for (int i = 0; i < cipher_preferences->count; i++) {
-        const struct s2n_iana_to_kem *supported_params = NULL;
-        if(s2n_cipher_suite_to_kem(cipher_preferences->suites[i]->iana_value, &supported_params) == 0) {
-            /* Each supported kem id is 2 bytes */
-            pq_kem_list_size += supported_params->kem_count * 2;
+    const uint8_t pq_kem_extension_required = s2n_pq_kem_extension_required(cipher_preferences);
+    if (pq_kem_extension_required) {
+        for (int i = 0; i < cipher_preferences->count; i++) {
+            const struct s2n_iana_to_kem *supported_params = NULL;
+            if (s2n_cipher_suite_to_kem(cipher_preferences->suites[i]->iana_value, &supported_params) == 0) {
+                /* Each supported kem id is 2 bytes */
+                pq_kem_list_size += supported_params->kem_count * 2;
+            }
+        }
+        if (pq_kem_list_size > 0) {
+            /* 2 for the extension id, 2 for overall length, 2 for length of the list, and the list size  */
+            total_size += 6 + pq_kem_list_size;
         }
     }
-    if (pq_kem_list_size > 0) {
-        /* 2 for the extension id, 2 for overall length, 2 for length of the list, and the list size  */
-        total_size += 6 + pq_kem_list_size;
+
+    if (conn->client_protocol_version >= S2N_TLS13) {
+        total_size += s2n_extensions_client_supported_versions_size(conn);
     }
 
     GUARD(s2n_stuffer_write_uint16(out, total_size));
+
+    if (conn->client_protocol_version >= S2N_TLS13) {
+        GUARD(s2n_extensions_client_supported_versions_send(conn, out));
+    }
 
     if (conn->actual_protocol_version == S2N_TLS12) {
         GUARD(s2n_send_client_signature_algorithms_extension(conn, out));
@@ -188,7 +201,7 @@ int s2n_client_extensions_send(struct s2n_connection *conn, struct s2n_stuffer *
      * RFC 4492: Clients SHOULD send both the Supported Elliptic Curves Extension
      * and the Supported Point Formats Extension.
      */
-    if (s2n_is_ecc_enabled(cipher_preferences)) {
+    if (ecc_extension_required) {
         int ec_curves_count = s2n_array_len(s2n_ecc_supported_curves);
         GUARD(s2n_stuffer_write_uint16(out, TLS_EXTENSION_ELLIPTIC_CURVES));
         GUARD(s2n_stuffer_write_uint16(out, 2 + ec_curves_count * 2));
@@ -207,7 +220,7 @@ int s2n_client_extensions_send(struct s2n_connection *conn, struct s2n_stuffer *
         GUARD(s2n_stuffer_write_uint8(out, 0));
     }
 
-    if (pq_kem_list_size > 0) {
+    if (pq_kem_extension_required) {
         GUARD(s2n_stuffer_write_uint16(out, TLS_EXTENSION_PQ_KEM_PARAMETERS));
         /* Overall extension length */
         GUARD(s2n_stuffer_write_uint16(out, 2 + pq_kem_list_size));
@@ -234,7 +247,7 @@ int s2n_client_extensions_recv(struct s2n_connection *conn, struct s2n_array *pa
         struct s2n_client_hello_parsed_extension *parsed_extension = s2n_array_get(parsed_extensions, i);
         notnull_check(parsed_extension);
 
-        struct s2n_stuffer extension = {{0}};
+        struct s2n_stuffer extension = {0};
         GUARD(s2n_stuffer_init(&extension, &parsed_extension->extension));
         GUARD(s2n_stuffer_write(&extension, &parsed_extension->extension));
 
@@ -271,6 +284,9 @@ int s2n_client_extensions_recv(struct s2n_connection *conn, struct s2n_array *pa
             break;
         case TLS_EXTENSION_PQ_KEM_PARAMETERS:
             GUARD(s2n_recv_pq_kem_extension(conn, &extension));
+            break;
+        case TLS_EXTENSION_SUPPORTED_VERSIONS:
+            GUARD(s2n_extensions_client_supported_versions_recv(conn, &extension));
             break;
         }
     }
@@ -328,8 +344,8 @@ static int s2n_recv_client_signature_algorithms(struct s2n_connection *conn, str
 static int s2n_recv_client_alpn(struct s2n_connection *conn, struct s2n_stuffer *extension)
 {
     uint16_t size_of_all;
-    struct s2n_stuffer client_protos = {{0}};
-    struct s2n_stuffer server_protos = {{0}};
+    struct s2n_stuffer client_protos = {0};
+    struct s2n_stuffer server_protos = {0};
 
     struct s2n_blob *server_app_protocols;
     GUARD(s2n_connection_get_protocol_preferences(conn, &server_app_protocols));

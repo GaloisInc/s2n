@@ -76,6 +76,9 @@ matrix:
     env: TESTS=sawDRBG                       SAW=true GCC_VERSION=NONE
     addons : *sawaddons
   - os : linux
+    env: TESTS=sawBIKE                       SAW=true GCC_VERSION=NONE S2N_LIBCRYPTO=openssl-1.0.2
+    addons : *sawaddons
+  - os : linux
     env: TESTS=sawSIKE                       SAW=true GCC_VERSION=NONE
     addons : *sawaddons
   - os : linux
