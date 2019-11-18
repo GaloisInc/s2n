@@ -7,6 +7,8 @@ RUN apt update && \
     clang \
     clang-3.8 \
     curl \
+    git \
+    language-pack-en \
     libssl-dev \
     llvm-3.8 \
     make
