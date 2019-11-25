@@ -86,7 +86,7 @@ let decode_spec with_post = do {
     (ct, ct_ptr) <- in_ref ct_T "ct";
     (sk, sk_ptr) <- in_ref sk_T "sk";
     u <- crucible_fresh_var "u" i32;
-    crucible_alloc_global "bike_errno";
+    // crucible_alloc_global "bike_errno";
     _bike_errno <- point_to i32_T (crucible_global "bike_errno") "bike_errno";
 
     crucible_precond {{ is_bounded_sk sk }};
@@ -128,7 +128,7 @@ let decode_first_loop_spec = do {
     (res', res_ptr) <- ptr_to_fresh "res'" i32;
     (i, i_ptr) <- ptr_to_fresh "i" i64;
     iter_ptr <- crucible_alloc i32;
-    crucible_alloc_global "bike_errno";
+    // crucible_alloc_global "bike_errno";
     _bike_errno <- point_to i32_T (crucible_global "bike_errno") "bike_errno";
 
     crucible_precond {{ is_bounded_sk sk }};
@@ -180,7 +180,7 @@ let decode_last_loop_spec = do {
     (res', res_ptr) <- ptr_to_fresh "res'" i32;
     (i, i_ptr) <- ptr_to_fresh "i" i64;
     (iter, iter_ptr) <- ptr_to_fresh "iter" i32;
-    crucible_alloc_global "bike_errno";
+    // crucible_alloc_global "bike_errno";
     _bike_errno <- point_to i32_T (crucible_global "bike_errno") "bike_errno";
 
     crucible_precond {{ is_bounded_sk sk }};

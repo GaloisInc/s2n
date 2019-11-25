@@ -56,7 +56,7 @@ let crypto_kem_dec_spec = do {
     ap <- out_ref char_ss_T;
     (b, bp) <- in_ref char_ct_T "ct";
     (c, cp) <- in_ref char_sk_T "sk";
-    crucible_alloc_global "bike_errno";
+    // crucible_alloc_global "bike_errno";
     _bike_errno <- point_to i32_T (crucible_global "bike_errno") "bike_errno";
 
     // NOTE: This is for memory safety
