@@ -23,5 +23,3 @@
 include "spec/handshake/handshake.saw";
 
 prove_handshake_io_lowlevel;
-prove_state_machine;
-prove_cork_uncork;

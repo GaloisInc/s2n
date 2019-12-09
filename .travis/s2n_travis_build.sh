@@ -32,9 +32,9 @@ fi
 
 # Use prlimit to set the memlock limit to unlimited for linux. OSX is unlimited by default
 if [[ "$TRAVIS_OS_NAME" == "linux" ]]; then
-    PRLIMIT_LOCATION=`which prlimit`
+    $(PRLIMIT_LOCATION)=`which prlimit`
     # sudo may not be able to find prlimit if we installed it in the test-deps directory. Force it to use the one on our current path.
-    sudo -E ${PRLIMIT_LOCATION} --pid "$$" --memlock=unlimited:unlimited;
+    sudo -E "${PRLIMIT_LOCATION}" --pid "$$" --memlock=unlimited:unlimited;
 fi
 
 # Set the version of GCC as Default if it's required
@@ -78,12 +78,9 @@ if [[ "$TESTS" == "ALL" || "$TESTS" == "integration" ]]; then make clean; make i
 if [[ "$TESTS" == "ALL" || "$TESTS" == "fuzz" ]]; then (make clean && make fuzz) ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "sawHMAC" ]] && [[ "$TRAVIS_OS_NAME" == "linux" ]]; then make -C tests/saw/ tmp/"verify_s2n_hmac_$SAW_HMAC_TEST".log ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "sawDRBG" ]]; then make -C tests/saw tmp/verify_drbg.log ; fi
-if [[ "$TESTS" == "ALL" || "$TESTS" == "tls" ]]; then
-    # We have to output something every 9 minutes, as some proofs may run longer than 10 minutes
-    while sleep 9m; do echo "=====[ $SECONDS seconds still running ]====="; done &
-    make -C tests/saw tmp/verify_handshake.log
-    kill %1
-fi
+if [[ "$TESTS" == "ALL" || "$TESTS" == "tls_handshake" ]]; then 
+    (travis_wait 40 make -C tests/saw tmp/verify_handshake.log && travis_wait 40 make -C tests/saw tmp/verify_state_machine.log) ; fi
+if [[ "$TESTS" == "ALL" || "$TESTS" == "tls_corking" ]]; then travis_wait 40 make -C tests/saw tmp/verify_cork_uncork.log ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "sawHMACFailure" ]]; then make -C tests/saw failure-tests ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "ctverif" ]]; then .travis/run_ctverif.sh "$CTVERIF_INSTALL_DIR" ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "sawSIKE" ]]; then make -C tests/saw sike ; fi

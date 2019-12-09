@@ -20,5 +20,4 @@
 
 include "spec/handshake/handshake.saw";
 
-prove_handshake_io_lowlevel;
 prove_cork_uncork;

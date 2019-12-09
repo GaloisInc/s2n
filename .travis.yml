@@ -120,7 +120,11 @@ jobs:
     addons : *sawaddons
   - os : linux
     dist: trusty
-    env: TESTS=tls SAW=true GCC_VERSION=NONE
+    env: TESTS=tls_handshake SAW=true GCC_VERSION=NONE
+    addons : *sawaddons
+  - os : linux
+    dist: trusty
+    env: TESTS=tls_corking SAW=true GCC_VERSION=NONE
     addons : *sawaddons
   - os : linux
     dist: trusty
