@@ -1,0 +1,30 @@
+name:                sikep434-performance-proof
+version:             0.1.0.0
+
+dependencies:
+- base >= 4.7 && < 5
+- bytestring
+- saw-script
+- saw-core
+- parameterized-utils
+- containers
+- macaw-base
+- macaw-symbolic
+- macaw-x86
+- macaw-x86-symbolic
+- crucible
+- crucible-llvm
+- flexdis86
+- crucible-saw
+- cryptol-verifier
+- abcBridge
+
+library:
+  source-dirs: src
+
+executables:
+  proof:
+    main:                Main.hs
+    source-dirs:         main
+    dependencies:
+    - sikep434-performance-proof

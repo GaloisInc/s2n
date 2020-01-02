@@ -1,0 +1,67 @@
+resolver: lts-14.5
+allow-newer: true
+
+flags: {}
+
+packages:
+  - .
+
+extra-deps:
+  - deps/saw-script/
+  - deps/saw-script/deps/llvm-pretty/
+  - deps/saw-script/deps/llvm-pretty-bc-parser/
+  - deps/saw-script/deps/jvm-parser/
+  - deps/saw-script/deps/aig/
+  - deps/saw-script/deps/abcBridge/
+  - deps/saw-script/deps/cryptol/
+  - deps/saw-script/deps/saw-core/
+  - deps/saw-script/deps/saw-core-aig/
+  - deps/saw-script/deps/saw-core-sbv/
+  - deps/saw-script/deps/saw-core-what4/
+  - deps/saw-script/deps/cryptol-verifier/
+  - deps/saw-script/deps/jvm-verifier/
+  - deps/saw-script/deps/crucible/what4/
+  - deps/saw-script/deps/crucible/what4-abc/
+  - deps/saw-script/deps/crucible/crucible/
+  - deps/saw-script/deps/crucible/crucible-jvm/
+  - deps/saw-script/deps/crucible/crucible-llvm/
+  - deps/saw-script/deps/crucible/crucible-saw/
+  - deps/saw-script/deps/crucible/crux/
+  - deps/saw-script/deps/parameterized-utils/
+  - deps/saw-script/deps/dwarf/
+  - deps/saw-script/deps/elf-edit/
+  - deps/saw-script/deps/flexdis86/
+  - deps/saw-script/deps/flexdis86/binary-symbols/
+  - deps/saw-script/deps/macaw/base/
+  - deps/saw-script/deps/macaw/symbolic/
+  - deps/saw-script/deps/macaw/x86/
+  - deps/saw-script/deps/macaw/x86_symbolic/
+
+  - IfElse-0.85
+  - fgl-visualize-0.1.0.1
+  - dotgen-0.4.2
+  - simple-smt-0.9.4
+  - GraphSCC-1.0.4
+  - monadLib-3.9
+  - sbv-8.3
+  - panic-0.4.0.1
+  - itanium-abi-0.1.1.1
+  - boomerang-1.4.5.6
+  - th-abstraction-0.3.1.0
+  - microlens-th-0.4.2.3
+  - deriving-compat-0.5.6
+  - bifunctors-5.5.4
+  - generic-deriving-1.12.4
+  - invariant-0.5.3
+  - lens-4.17.1
+  - th-lift-0.8.0.1
+  - config-schema-1.1.0.0
+  - config-value-0.6.3.1
+  - simple-get-opt-0.3
+  - zenc-0.1.1
+
+nix:
+  enable: true
+  packages:
+  - z3
+  - zlib

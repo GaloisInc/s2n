@@ -1,0 +1,63 @@
+cabal-version: 1.12
+
+-- This file has been generated from package.yaml by hpack version 0.33.0.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 1d98f701c60fa006c800d854c4a3d93c0f59d9e041791bb33b9d1cf397870d42
+
+name:           sikep434-performance-proof
+version:        0.1.0.0
+build-type:     Simple
+
+library
+  exposed-modules:
+      Proof
+  other-modules:
+      Paths_sikep434_performance_proof
+  hs-source-dirs:
+      src
+  build-depends:
+      abcBridge
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , crucible
+    , crucible-llvm
+    , crucible-saw
+    , cryptol-verifier
+    , flexdis86
+    , macaw-base
+    , macaw-symbolic
+    , macaw-x86
+    , macaw-x86-symbolic
+    , parameterized-utils
+    , saw-core
+    , saw-script
+  default-language: Haskell2010
+
+executable proof
+  main-is: Main.hs
+  other-modules:
+      Paths_sikep434_performance_proof
+  hs-source-dirs:
+      main
+  build-depends:
+      abcBridge
+    , base >=4.7 && <5
+    , bytestring
+    , containers
+    , crucible
+    , crucible-llvm
+    , crucible-saw
+    , cryptol-verifier
+    , flexdis86
+    , macaw-base
+    , macaw-symbolic
+    , macaw-x86
+    , macaw-x86-symbolic
+    , parameterized-utils
+    , saw-core
+    , saw-script
+    , sikep434-performance-proof
+  default-language: Haskell2010
