@@ -24,10 +24,13 @@ all: $(OBJS)
 	$(MAKE) -C sike_r1
 	$(MAKE) -C sike_r2
 
-.PHONY : sike_bc
-sike_bc: $(BCS1)
+.PHONY : sike_r1_bc
+sike_r1_bc: $(BCS1)
 	$(MAKE) -C sike_r1 bc
-#	$(MAKE) -C sike_r2 bc TODO add when ready for SIKE R2 SAW proofs
+
+.PHONY : sike_r2_bc
+sike_r2_bc: $(BCS1)
+	$(MAKE) -C sike_r2 bc
 
 .PHONY : bike_bc
 bike_bc: $(BCS1)
