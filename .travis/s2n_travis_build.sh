@@ -88,6 +88,7 @@ if [[ "$TESTS" == "ALL" || "$TESTS" == "sawHMACFailure" ]]; then make -C tests/s
 if [[ "$TESTS" == "ALL" || "$TESTS" == "ctverif" ]]; then .travis/run_ctverif.sh "$CTVERIF_INSTALL_DIR" ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "sawSIKE_r1" ]]; then make -C tests/saw sike_r1 ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "sawBIKE_r1" ]]; then make -C tests/saw bike_r1 ; fi
+if [[ "$TESTS" == "ALL" || "$TESTS" == "sawBIKE_r2" ]]; then make -C tests/saw bike_r2 ; fi
 if [[ "$TESTS" == "ALL" || "$TESTS" == "sidetrail" ]]; then .travis/run_sidetrail.sh "$SIDETRAIL_INSTALL_DIR" "$PART" ; fi
 
 # Generate *.gcov files that can be picked up by the CodeCov.io Bash helper script. Don't run lcov or genhtml 
