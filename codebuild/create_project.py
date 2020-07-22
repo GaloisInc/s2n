@@ -31,9 +31,51 @@ from troposphere import GetAtt, Template, Ref, Output
 from troposphere.events import Rule, Target
 from troposphere.iam import Role, Policy
 from troposphere.codebuild import Artifacts, Environment, Source, Project
+from troposphere.logs import MetricFilter, MetricTransformation
+from troposphere.cloudwatch import Alarm
 
 logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
+
+def build_cw_alarm(template=Template, filter_pattern=None, alarm_namespace=None, metric_name=None, metric_value=None, project_name=None, log_group_name=None, alarm_topic=None):
+    """ Create a CloudWatch Alarm and corresponding MetricFilter """
+    if not metric_value:
+        metric_value = "1"
+
+    MetricFilter(
+        f"{project_name}MetricFilter",
+        template=template,
+        FilterPattern=filter_pattern,
+        LogGroupName= "arn:aws:logs:{region}:{account_number}:log-group:/aws/codebuild/{project}:*".format(
+            region=config.get('Global', 'aws_region'),
+            account_number=config.get('CFNRole', 'account_number'),
+            project=project_name),
+        MetricTransformations=[MetricTransformation(
+            f"{project_name}MetricTransformation",
+            MetricNamespace=alarm_namespace,
+            MetricName=metric_name,
+            MetricValue=metric_value)]
+    )
+
+    Alarm(
+        f"{project_name}Alarm",
+        template=template,
+        ActionsEnabled=True,
+        AlarmDescription=f"Alarm if {project_name} metric filter is exceeded",
+        Namespace=alarm_namespace,
+        MetricName=metric_name,
+        Statistic="Sum",
+        Period=86400,
+        EvaluationPeriods=1,
+        Threshold=0,
+        ComparisonOperator="GreaterThanThreshold",
+        AlarmActions=[
+            "arn:aws:sns:{region}:{account_number}:{alarm_topic}".format(
+                region=config.get('Global', 'aws_region'),
+                account_number=config.get('CFNRole', 'account_number'),
+                alarm_topic=alarm_topic),
+        ]
+    )
 
 
 def build_cw_event(template=Template, project_name=None, role=None, target_job=None, hour=12, input_json=None):
@@ -407,6 +449,17 @@ def main(args, config):
             build_cw_event(template=codebuild, project_name=job_title, target_job=config.get(job, 'build_job_name'),
                            role=cw_event_role,
                            hour=config.get(job, 'start_time'), input_json=cw_input)
+        if 'Alarm' in job:
+            if 'metric_value' in config[job]:
+                metric_value = config.get(job, 'metric_value')
+            else:
+                metric_value = None
+            build_cw_alarm(template=codebuild, filter_pattern=config.get(job, 'filter_pattern'),
+                           alarm_namespace=config.get(job, 'alarm_namespace'), metric_name=config.get(job, 'metric_name'),
+                           metric_value=metric_value, project_name=job_title,
+                           log_group_name=config.get(job, 'log_group_name'), alarm_topic=config.get(job, 'alarm_topic'))
+
+# def build_cw_alarm(template=Template, filter_pattern=None, alarm_namespace=None, metric_name=None, metric_value=None, project_name=None, log_group_name=None, alarm_topic=None):
 
     # Write out a CloudFormation template.  This is ephemeral and is not used again.
     with(open(temp_yaml_filename, 'w')) as fh:
