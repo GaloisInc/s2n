@@ -24,6 +24,9 @@ import os
 import sys
 import time
 
+# https://github.com/cloudtools/troposphere/issues/1337
+os.environ['TROPO_REAL_BOOL'] = 'true'
+
 from awacs.aws import Action, Allow, Statement, Principal, PolicyDocument
 from awacs.sts import AssumeRole
 from botocore import exceptions
@@ -113,7 +116,6 @@ def build_cw_event(template=Template, project_name=None, role=None, target_job=N
          State='ENABLED',
          # Run at the top of hour.
          ScheduleExpression=f"cron(0 {hour} * * ? *)",
-         DependsOn=target_job
          )
 
 
@@ -194,7 +196,7 @@ def build_artifacts(identifier: str, s3_bucketname: str) -> Artifacts:
 
 
 def build_project(template=Template(), section=None, project_name=None, raw_env=None,
-                  service_role: str = None) -> Template:
+                  service_role: str = None):
     """ Assemble all the requirements for a Troposphere CodeBuild Project. """
     template.set_version('2010-09-09')
     secondary_artifacts = list()
@@ -237,7 +239,7 @@ def build_project(template=Template(), section=None, project_name=None, raw_env=
     source = Source(
         Location=config.get(section, 'source_location'),
         Type=config.get(section, 'source_type'),
-        GitCloneDepth=config.get(section, 'source_clonedepth'),
+        GitCloneDepth=int(config.get(section, 'source_clonedepth')),
         BuildSpec=config.get(section, 'buildspec'),
         ReportBuildStatus=True
     )
@@ -250,12 +252,11 @@ def build_project(template=Template(), section=None, project_name=None, raw_env=
             SecondaryArtifacts=secondary_artifacts,
             Environment=environment,
             Name=project_name,
-            TimeoutInMinutes=config.get(section, 'timeout_in_min'),
+            TimeoutInMinutes=int(config.get(section, 'timeout_in_min')),
             ServiceRole=Ref(service_role),
             Source=source,
             SourceVersion=config.get(section, 'source_version'),
             BadgeEnabled=True,
-            DependsOn=service_role,
         )
     else:
         project = Project(
@@ -263,12 +264,11 @@ def build_project(template=Template(), section=None, project_name=None, raw_env=
             Artifacts=artifacts,
             Environment=environment,
             Name=project_name,
-            TimeoutInMinutes=config.get(section, 'timeout_in_min'),
+            TimeoutInMinutes=int(config.get(section, 'timeout_in_min')),
             ServiceRole=Ref(service_role),
             Source=source,
             SourceVersion=config.get(section, 'source_version'),
             BadgeEnabled=True,
-            DependsOn=service_role,
         )
     template.add_resource(project)
     template.add_output([Output(f"CodeBuildProject{project_name}", Value=Ref(project))])
@@ -399,7 +399,7 @@ def create_new_stack(client, config, codebuild):
             TemplateBody=codebuild.to_yaml(),
             Capabilities=["CAPABILITY_IAM"])
         logging.info("Creating stack {}".format(result['StackId']))
-    except client.exceptions.AlreadyExistsException as e:
+    except client.exceptions.AlreadyExistsException as _:
         logging.error("Stack already exists, you must use the --modify-existing flag to update a stack")
 
 
@@ -429,6 +429,8 @@ def main(args, config):
     for job in config.sections():
         if ':' in job:
             job_title = job.split(':')[1]
+        else:
+            job_title = None
         if 'CodeBuild:' in job:
             service_role = build_codebuild_role(config,template=codebuild, project_name=job_title).to_dict()
 
