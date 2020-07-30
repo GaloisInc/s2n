@@ -49,10 +49,10 @@ def build_cw_alarm(template=Template, filter_pattern=None, alarm_namespace=None,
         f"{project_name}MetricFilter",
         template=template,
         FilterPattern=filter_pattern,
-        LogGroupName= "arn:aws:logs:{region}:{account_number}:log-group:/aws/codebuild/{project}:*".format(
+        LogGroupName= "arn:aws:logs:{region}:{account_number}:log-group:{log_group_name}:*".format(
             region=config.get('Global', 'aws_region'),
             account_number=config.get('CFNRole', 'account_number'),
-            project=project_name),
+            log_group_name=log_group_name),
         MetricTransformations=[MetricTransformation(
             f"{project_name}MetricTransformation",
             MetricNamespace=alarm_namespace,
@@ -460,8 +460,6 @@ def main(args, config):
                            alarm_namespace=config.get(job, 'alarm_namespace'), metric_name=config.get(job, 'metric_name'),
                            metric_value=metric_value, project_name=job_title,
                            log_group_name=config.get(job, 'log_group_name'), alarm_topic=config.get(job, 'alarm_topic'))
-
-# def build_cw_alarm(template=Template, filter_pattern=None, alarm_namespace=None, metric_name=None, metric_value=None, project_name=None, log_group_name=None, alarm_topic=None):
 
     # Write out a CloudFormation template.  This is ephemeral and is not used again.
     with(open(temp_yaml_filename, 'w')) as fh:
