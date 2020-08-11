@@ -22,8 +22,8 @@ let tactic unints =
         ( do {
             simplify (cryptol_ss ());
             print_goal; 
-            w4_unint_yices unints;} )
-    else w4_unint_yices unints;
+            w4_unint_z3 unints;} )
+    else w4_unint_z3 unints;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Proof commands for use in production
@@ -49,7 +49,7 @@ let test func overrides spec =
 let really_verify_simps func overrides unints spec transformations =
     crucible_llvm_verify m func overrides false spec do {
         transformations;
-        unint_yices unints;
+        unint_z3 unints;
     };
 
 let verify_simps func overrides unints spec transformations =
@@ -79,7 +79,7 @@ let really_verify func overrides spec =
 let really_verify_simps func overrides unints spec transformations =
     crucible_llvm_verify m func overrides false spec do {
         transformations;
-        unint_yices unints;
+        unint_z3 unints;
     };
 
 let really_verify_unint func overrides unints spec =
@@ -100,7 +100,7 @@ let show_goal func overrides unints spec transformations =
     crucible_llvm_verify m func overrides false spec do {
         transformations;
         print_goal;
-        unint_yices unints;
+        unint_z3 unints;
     };
 
 

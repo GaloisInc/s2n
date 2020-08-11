@@ -68,7 +68,7 @@ let verify_s2n_hmac_init
           // We do this override here because it is key-size specific, the
           // ones above are agnostic
           (t, hash_update_key_size_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec key_size));
-          with_time (crucible_llvm_verify m "s2n_hmac_init" (concat ovs [hash_update_key_size_ov]) false (hmac_init_spec key_size cfg) yices_hash_unint);
+          with_time (crucible_llvm_verify m "s2n_hmac_init" (concat ovs [hash_update_key_size_ov]) false (hmac_init_spec key_size cfg) z3_hash_unint);
         });
         
   print "Finished proving s2n_hmac_init";
@@ -93,7 +93,7 @@ let verify_s2n_hmac_update
           print "";
           print (str_concat "Proving s2n_hmac_update: message_size=" (show message_size));
           (t, hash_update_msg_size_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec message_size));
-          with_time (crucible_llvm_verify m "s2n_hmac_update" [hash_update_msg_size_ov] false (hmac_update_spec message_size cfg) yices_hash_unint);
+          with_time (crucible_llvm_verify m "s2n_hmac_update" [hash_update_msg_size_ov] false (hmac_update_spec message_size cfg) z3_hash_unint);
         });
         
   print "Finished proving s2n_hmac_update";
@@ -125,7 +125,7 @@ let verify_s2n_hmac_digest
     ];
   
   (t, hmac_digest_ov) <-
-    with_time (crucible_llvm_verify m "s2n_hmac_digest" ovs false (hmac_digest_spec cfg) yices_hash_unint);
+    with_time (crucible_llvm_verify m "s2n_hmac_digest" ovs false (hmac_digest_spec cfg) z3_hash_unint);
         
   print "Finished proving s2n_hmac_digest";
 };

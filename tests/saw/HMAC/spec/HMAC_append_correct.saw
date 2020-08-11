@@ -76,5 +76,5 @@ time (prove_print (do {
     unfolding ["hmac_update_c_state"];
     simplify(cryptol_ss ());
     simplify (addsimp' hash_lemma2 empty_ss);
-    unint_yices ["hash_update_c_state"];
+    unint_z3 ["hash_update_c_state"];
 }) {{ hmac_update_empty }});

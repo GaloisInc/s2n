@@ -50,11 +50,11 @@ let ptr_to_fresh_readonly n ty = do {
     return (x, p);
 };
 
-let yices_hash_unint =
-    unint_yices [ "hash_init_c_state"
-                , "hash_update_c_state"
-                , "hash_digest_c_state"
-                ];
+let z3_hash_unint =
+    unint_z3 [ "hash_init_c_state"
+             , "hash_update_c_state"
+             , "hash_digest_c_state"
+             ];
 
 ////////////////////////////////////////////////////////////////
 // Hash.
