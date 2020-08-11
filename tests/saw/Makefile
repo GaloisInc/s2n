@@ -23,13 +23,11 @@ SCRIPTS = $(wildcard *.saw)
 #A log file will be created for each test in the temp dir
 LOGS=$(patsubst %.saw,tmp/%.log,$(SCRIPTS))
 SHELL:=/bin/bash
-YICES_VERSION=$(shell yices-smt2 --version)
 export LIBCRYPTO_ROOT:=$(shell pwd)/../../libcrypto-root
 export S2N_ROOT=$(shell pwd)/s2n
 
 .PHONY : all
 all:
-	@echo "Running formal verification with ${YICES_VERSION}"
 	@${MAKE} clean-logs
 	@${MAKE} clean_the_dir
 	@${MAKE} $(LOGS)
@@ -78,7 +76,6 @@ clean_the_dir :
 # The pipefail command causes the entire command to fail if saw fails, even though we pipe it to tee
 # without it we would see only the tee return code
 tmp/%.log : %.saw bitcode/all_llvm.bc tmp
-	@echo "Running formal verification with ${YICES_VERSION}"
 	@echo "Running formal verification with SAW version:"
 	@saw --version
 	set -o pipefail; \
