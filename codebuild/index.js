@@ -3,12 +3,7 @@ const cw = new AWS.CloudWatch({ apiVersion: "2010-08-01" });
 const cb = new AWS.CodeBuild({ apiVersion: "2016-10-06" });
 const now = Date.now();
 
-const putMetric = async ({
-  seconds = 0,
-  projectName,
-  ns = "proofs",
-  buildStatus = "MISSING",
-}) =>
+const putMetric = async ({ seconds = 0, projectName, ns = "proofs" }) =>
   await cw
     .putMetricData({
       Namespace: ns,
@@ -18,10 +13,7 @@ const putMetric = async ({
           Unit: "Seconds",
           Value: seconds,
           Timestamp: new Date(now),
-          Dimensions: [
-            { Name: "projectName", Value: projectName },
-            { Name: "buildStatus", Value: buildStatus },
-          ],
+          Dimensions: [{ Name: "projectName", Value: projectName }],
         },
       ],
     })
@@ -51,6 +43,5 @@ exports.handler = async (event, _context) => {
   return putMetric({
     seconds: secondsSinceLastCompletedRun,
     projectName,
-    buildStatus: build.buildStatus,
   });
 };

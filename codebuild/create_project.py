@@ -34,7 +34,7 @@ from troposphere import GetAtt, Template, Ref, Output
 from troposphere.events import Rule, Target
 from troposphere.iam import Role, Policy
 from troposphere.codebuild import Artifacts, Environment, Source, Project
-from troposphere.cloudwatch import Alarm
+from troposphere.cloudwatch import Alarm, MetricDimension
 from troposphere.awslambda import Code, Function
 
 logging.getLogger(__name__)
@@ -94,6 +94,7 @@ def build_cw_alarm(
         AlarmDescription=f"Alarm if time since last run for {project_name} exceeds ",
         Namespace=alarm_namespace,
         MetricName=metric_name,
+        Dimensions=[MetricDimension(Name="projectName", Value=project_name)],
         Statistic="Maximum",
         Period=3600,
         EvaluationPeriods=1,
