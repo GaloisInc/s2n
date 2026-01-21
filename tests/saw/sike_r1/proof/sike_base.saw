@@ -39,7 +39,7 @@ let f2elm_t = llvm_array 2 felm_t;
 ///////////////////////////////////////////////////////////////////////////////
 // Aliases
 
-let point_struct = llvm_struct "struct.point_proj";
+let point_struct = llvm_alias "struct.point_proj";
 let point_proj_t = llvm_array 1 point_struct;
 let fresh_digit n = crucible_fresh_var n digit_t;
 

@@ -13,15 +13,15 @@ let rsize_t = i8_array_t R_SIZE;
 
 ///////////////////////////////////////////////////////////////////////////////
 // Types involving structures
-let uint128_t = llvm_struct "struct.uint128_s";
+let uint128_t = llvm_alias "struct.uint128_s";
 
-let seed_t = llvm_struct "struct.seed_s";
+let seed_t = llvm_alias "struct.seed_s";
 
-let r_t = llvm_struct "struct.r_s";
+let r_t = llvm_alias "struct.r_s";
 
-let e_t = llvm_struct "struct.e_s";
+let e_t = llvm_alias "struct.e_s";
 
-let generic_param_n_t = llvm_struct "struct.generic_param_n_s";
+let generic_param_n_t = llvm_alias "struct.generic_param_n_s";
 
 let ct_t = generic_param_n_t;
 let pk_t = generic_param_n_t;
@@ -32,19 +32,19 @@ let char_pk_t = pk_t;
 let idx_t = i32;
 let idx_array_t n = llvm_array n idx_t;
 
-let compressed_idx_dv_ar_t = llvm_array N0 (llvm_struct "struct.compressed_idx_dv_s");
+let compressed_idx_dv_ar_t = llvm_array N0 (llvm_alias "struct.compressed_idx_dv_s");
 
 let char_sk_t = i8_array_t (eval_int {{ `(N0 * R_SIZE + N0 * DV * 4 + R_SIZE + R_SIZE) : [64] }});
 let sk_t = char_sk_t;
 
-let padded_r_t = llvm_struct "struct.padded_r_s";
+let padded_r_t = llvm_alias "struct.padded_r_s";
 
 let char_ss_t = i8_array_t ELL_K_SIZE;
 
-let syndrome_t = llvm_struct "struct.syndrome_s";
+let syndrome_t = llvm_alias "struct.syndrome_s";
 
-let evp_cipher_ctx_st_t = llvm_struct "struct.evp_cipher_ctx_st";
-let evp_cipher_st_t = llvm_struct "struct.evp_cipher_st";
+let evp_cipher_ctx_st_t = llvm_alias "struct.evp_cipher_ctx_st";
+let evp_cipher_st_t = llvm_alias "struct.evp_cipher_st";
 
 // NOTE: pointer to a struct!
 let aes256_ks_t = llvm_type "%struct.evp_cipher_ctx_st*";
@@ -52,7 +52,7 @@ let aes256_ks_t = llvm_type "%struct.evp_cipher_ctx_st*";
 // "struct.aes256_key_s" has the same layout as "struct.seed_s";
 let aes256_key_t = seed_t;
 
-let aes_ctr_prf_state_t = llvm_struct "struct.aes_ctr_prf_state_s";
+let aes_ctr_prf_state_t = llvm_alias "struct.aes_ctr_prf_state_s";
 
 let points_to_fresh_aes_ctr_prf_state (is_cond, cond) ptr ks_ptr name = do {
   _ <- point_to uint128_t (crucible_field ptr "ctr") (str_concat name ".ctr");

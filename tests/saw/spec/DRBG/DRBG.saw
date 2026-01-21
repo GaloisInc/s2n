@@ -93,7 +93,7 @@ fake_entropy <- fresh_symbolic "fake_entropy" {| [seedsize*8] |};
 
 let ctx_type = bytes_type keysize;
 
-let blob_type = llvm_struct "struct.s2n_blob";
+let blob_type = llvm_alias "struct.s2n_blob";
 let alloc_blob n = do {
     p <- crucible_alloc_readonly blob_type;
     datap <- alloc_bytes n;
@@ -113,7 +113,7 @@ let alloc_blob_readonly n = do {
 };
 
 let drbg_state n = do {
-    state <- crucible_alloc (llvm_struct "struct.s2n_drbg");
+    state <- crucible_alloc (llvm_alias "struct.s2n_drbg");
     (key, keyp) <- ptr_to_fresh "key" ctx_type;
     bytes_used <- crucible_fresh_var (str_concat n "->bytes_used") i64;
     v <- crucible_fresh_var (str_concat n "->v") (bytes_type blocksize);
