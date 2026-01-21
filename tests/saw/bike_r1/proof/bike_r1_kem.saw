@@ -8,7 +8,7 @@
 let split_e_spec = do {
   splitted_e_ptr <- out_ref split_e_t;
   (_, e_ptr) <- in_ref e_t "e";
-  crucible_execute_func [splitted_e_ptr, e_ptr];
+  llvm_execute_func [splitted_e_ptr, e_ptr];
   _ <- point_to split_e_t splitted_e_ptr "splitted_e";
   return ();
 };
@@ -16,36 +16,36 @@ let split_e_spec = do {
 let keypair_spec = do {
   pk_ptr <- out_ref char_pk_t;
   sk_ptr <- out_ref char_sk_t;
-  crucible_execute_func [pk_ptr, sk_ptr];
+  llvm_execute_func [pk_ptr, sk_ptr];
   _ <- point_to char_pk_t pk_ptr "pk";
   _ <- point_to char_sk_t sk_ptr "sk";
-  crucible_return (tm {{ fromInteger`{[32]} SUCCESS }});
+  llvm_return (tm {{ fromInteger`{[32]} SUCCESS }});
 };
 
 let crypto_kem_enc_spec = do {
   ct_ptr <- out_ref char_ct_t;
   ss_ptr <- out_ref char_ss_t;
   (_, pk_ptr) <- in_ref char_pk_t "pk";
-  crucible_execute_func [ct_ptr, ss_ptr, pk_ptr];
+  llvm_execute_func [ct_ptr, ss_ptr, pk_ptr];
   _ <- point_to char_ct_t ct_ptr "ct";
   _ <- point_to char_ss_t ss_ptr "ss";
-  crucible_return (tm {{ fromInteger`{[32]} SUCCESS }});
+  llvm_return (tm {{ fromInteger`{[32]} SUCCESS }});
 };
 
 let crypto_kem_dec_spec = do {
   ss_ptr <- out_ref char_ss_t;
   (_, ct_ptr) <- in_ref char_ct_t "ct";
   (_, sk_ptr) <- in_ref char_sk_t "sk";
-  crucible_alloc_global bike_errno_glob_name;
-  _ <- point_to i32 (crucible_global bike_errno_glob_name) "bike_errno";
+  llvm_alloc_global bike_errno_glob_name;
+  _ <- point_to i32 (llvm_global bike_errno_glob_name) "bike_errno";
 
-  crucible_execute_func [ss_ptr, ct_ptr, sk_ptr];
+  llvm_execute_func [ss_ptr, ct_ptr, sk_ptr];
 
   // NOTE: crypto_kem_dec writes *ss only on success
   // _ <- point_to char_ss_t ss_ptr "ss";
-  _ <- point_to i32 (crucible_global bike_errno_glob_name) "bike_errno'";
-  ret <- crucible_fresh_var "ret" i32;
-  crucible_return (tm ret);
+  _ <- point_to i32 (llvm_global bike_errno_glob_name) "bike_errno'";
+  ret <- llvm_fresh_var "ret" i32;
+  llvm_return (tm ret);
 };
 
 

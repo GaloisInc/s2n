@@ -13,18 +13,18 @@ let point_op t3 t4 = do {
     qp <- C_point_t();
     (a, ap) <- A_f2elm_t t3;
     (c, cp) <- A_f2elm_t t4;
-    crucible_execute_func [pp, qp, ap, cp];
-    q <- crucible_fresh_var "Q" point_proj_t;
-    crucible_points_to qp (tm q);
+    llvm_execute_func [pp, qp, ap, cp];
+    q <- llvm_fresh_var "Q" point_proj_t;
+    llvm_points_to qp (tm q);
 };
 
 let point_op_same t3 t4 = do {
     (p, pp) <- B_point_t "P";
     (a, ap) <- A_f2elm_t t3;
     (c, cp) <- A_f2elm_t t4;
-    crucible_execute_func [pp, pp, ap, cp];
-    p' <- crucible_fresh_var "Q" point_proj_t;
-    crucible_points_to pp (tm p');
+    llvm_execute_func [pp, pp, ap, cp];
+    p' <- llvm_fresh_var "Q" point_proj_t;
+    llvm_points_to pp (tm p');
 };
 
 let xDBL_spec = point_op "A24plus" "C24";

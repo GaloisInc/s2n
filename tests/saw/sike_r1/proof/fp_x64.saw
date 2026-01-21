@@ -6,9 +6,9 @@ enable_experimental;
 let mp_mul_asm_spec n m = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
     (b, bp) <- ptr_to_fresh_readonly "b" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array m digit_t);
+    cp <- llvm_alloc (llvm_array m digit_t);
 
-    crucible_execute_func [ap, bp, cp];
+    llvm_execute_func [ap, bp, cp];
 
     points_to_fresh cp "_c" (llvm_array m digit_t);
     return ();
@@ -16,9 +16,9 @@ let mp_mul_asm_spec n m = do {
 
 let mp_mul_asm_single_spec n m = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array m digit_t);
+    cp <- llvm_alloc (llvm_array m digit_t);
 
-    crucible_execute_func [ap, ap, cp];
+    llvm_execute_func [ap, ap, cp];
 
     points_to_fresh cp "_c" (llvm_array m digit_t);
     return ();
@@ -34,10 +34,10 @@ let mp_mul_asm_single_spec n m = do {
 let mp_mul_new_spec n m = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
     (b, bp) <- ptr_to_fresh_readonly "b" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array m digit_t);
-    n <- crucible_fresh_var "n" (llvm_int 32);
+    cp <- llvm_alloc (llvm_array m digit_t);
+    n <- llvm_fresh_var "n" (llvm_int 32);
 
-    crucible_execute_func [ap, bp, cp, tm n];
+    llvm_execute_func [ap, bp, cp, tm n];
 
     points_to_fresh cp "_c" (llvm_array m digit_t);
     return ();
@@ -45,10 +45,10 @@ let mp_mul_new_spec n m = do {
 
 let mp_mul_single_new_spec n m = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array m digit_t);
-    n <- crucible_fresh_var "n" (llvm_int 32);
+    cp <- llvm_alloc (llvm_array m digit_t);
+    n <- llvm_fresh_var "n" (llvm_int 32);
 
-    crucible_execute_func [ap, ap, cp, tm n];
+    llvm_execute_func [ap, ap, cp, tm n];
 
     points_to_fresh cp "_c" (llvm_array m digit_t);
     return ();

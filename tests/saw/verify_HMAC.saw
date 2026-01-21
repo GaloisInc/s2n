@@ -37,13 +37,13 @@ let verify_s2n_hmac_init
   print (str_concat "Verifying HMAC init: alg = " cfg.name);
   
   print "Creating hash overrides...";
-  (t, hash_init_ov)  <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_init" hash_init_spec);
-  (t, hmac_digest_size_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hmac_digest_size" (hmac_digest_size_spec cfg));
-  (t, hash_copy_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_copy" hash_copy_spec);
-  (t, hash_reset_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_reset" hash_reset_spec);
-  (t, hash_get_currently_in_hash_total_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_get_currently_in_hash_total" (hash_get_currently_in_hash_total_spec));
-  (t, hash_update_block_size_ov)  <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec cfg.block_size));
-  (t, hash_digest_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_digest" (hash_digest_spec (cfg.digest_size)));
+  (t, hash_init_ov)  <- with_time (llvm_unsafe_assume_spec m "s2n_hash_init" hash_init_spec);
+  (t, hmac_digest_size_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hmac_digest_size" (hmac_digest_size_spec cfg));
+  (t, hash_copy_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_copy" hash_copy_spec);
+  (t, hash_reset_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_reset" hash_reset_spec);
+  (t, hash_get_currently_in_hash_total_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_get_currently_in_hash_total" (hash_get_currently_in_hash_total_spec));
+  (t, hash_update_block_size_ov)  <- with_time (llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec cfg.block_size));
+  (t, hash_digest_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_digest" (hash_digest_spec (cfg.digest_size)));
   print "Done";
   
   let ovs =
@@ -67,8 +67,8 @@ let verify_s2n_hmac_init
           print (str_concat "Proving s2n_hmac_init: key_size=" (show key_size));
           // We do this override here because it is key-size specific, the
           // ones above are agnostic
-          (t, hash_update_key_size_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec key_size));
-          with_time (crucible_llvm_verify m "s2n_hmac_init" (concat ovs [hash_update_key_size_ov]) false (hmac_init_spec key_size cfg) yices_hash_unint);
+          (t, hash_update_key_size_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec key_size));
+          with_time (llvm_verify m "s2n_hmac_init" (concat ovs [hash_update_key_size_ov]) false (hmac_init_spec key_size cfg) yices_hash_unint);
         });
         
   print "Finished proving s2n_hmac_init";
@@ -92,8 +92,8 @@ let verify_s2n_hmac_update
         (\message_size -> do{
           print "";
           print (str_concat "Proving s2n_hmac_update: message_size=" (show message_size));
-          (t, hash_update_msg_size_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec message_size));
-          with_time (crucible_llvm_verify m "s2n_hmac_update" [hash_update_msg_size_ov] false (hmac_update_spec message_size cfg) yices_hash_unint);
+          (t, hash_update_msg_size_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec message_size));
+          with_time (llvm_verify m "s2n_hmac_update" [hash_update_msg_size_ov] false (hmac_update_spec message_size cfg) yices_hash_unint);
         });
         
   print "Finished proving s2n_hmac_update";
@@ -113,9 +113,9 @@ let verify_s2n_hmac_digest
   print (str_concat "Verifying HMAC digest: alg = " cfg.name);
   
   print "Creating hash overrides...";
-  (t, hash_copy_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_copy" hash_copy_spec);
-  (t, hash_update_block_size_ov)  <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec cfg.digest_size));
-  (t, hash_digest_ov) <- with_time (crucible_llvm_unsafe_assume_spec m "s2n_hash_digest" (hash_digest_spec (cfg.digest_size)));
+  (t, hash_copy_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_copy" hash_copy_spec);
+  (t, hash_update_block_size_ov)  <- with_time (llvm_unsafe_assume_spec m "s2n_hash_update" (hash_update_spec cfg.digest_size));
+  (t, hash_digest_ov) <- with_time (llvm_unsafe_assume_spec m "s2n_hash_digest" (hash_digest_spec (cfg.digest_size)));
   print "Done";
   
   let ovs =
@@ -125,7 +125,7 @@ let verify_s2n_hmac_digest
     ];
   
   (t, hmac_digest_ov) <-
-    with_time (crucible_llvm_verify m "s2n_hmac_digest" ovs false (hmac_digest_spec cfg) yices_hash_unint);
+    with_time (llvm_verify m "s2n_hmac_digest" ovs false (hmac_digest_spec cfg) yices_hash_unint);
         
   print "Finished proving s2n_hmac_digest";
 };

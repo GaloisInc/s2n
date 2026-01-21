@@ -10,22 +10,22 @@
 
 let copy_words_spec n = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array n digit_t);
-    crucible_execute_func [ap, cp, tm {{ `n : [32] }}];
-    crucible_points_to cp (tm a);
+    cp <- llvm_alloc (llvm_array n digit_t);
+    llvm_execute_func [ap, cp, tm {{ `n : [32] }}];
+    llvm_points_to cp (tm a);
 };
 
 let copy_words_same_spec n = do {
     (a, ap) <- ptr_to_fresh "a" (llvm_array n digit_t);
-    crucible_execute_func [ap, ap, tm {{ `n : [32] }}];
-    crucible_points_to ap (tm a);
+    llvm_execute_func [ap, ap, tm {{ `n : [32] }}];
+    llvm_points_to ap (tm a);
 };
 
 let digit_x_digit_spec = do {
     a <- fresh_digit "a";
     b <- fresh_digit "b";
-    cp <- crucible_alloc (llvm_array 2 digit_t);
-    crucible_execute_func [tm a, tm b, cp];
+    cp <- llvm_alloc (llvm_array 2 digit_t);
+    llvm_execute_func [tm a, tm b, cp];
     points_to_fresh cp "c" (llvm_array 2 digit_t);
     return ();
 };
@@ -33,88 +33,88 @@ let digit_x_digit_spec = do {
 let is_digit_lessthan_ct_spec = do {
     a <- fresh_digit "a";
     b <- fresh_digit "b";
-    crucible_execute_func [tm a, tm b];
-    r <- crucible_fresh_var "r" i32;
-    crucible_return (tm r);
+    llvm_execute_func [tm a, tm b];
+    r <- llvm_fresh_var "r" i32;
+    llvm_return (tm r);
 };
 
 let is_digit_nonzero_ct_spec = do {
     a <- fresh_digit "a";
-    crucible_execute_func [tm a];
-    r <- crucible_fresh_var "r" i32;
-    crucible_return (tm r);
+    llvm_execute_func [tm a];
+    r <- llvm_fresh_var "r" i32;
+    llvm_return (tm r);
 };
 
 let is_digit_zero_ct_spec = do {
     a <- fresh_digit "a";
-    crucible_execute_func [tm a];
-    r <- crucible_fresh_var "r" i32;
-    crucible_return (tm r);
+    llvm_execute_func [tm a];
+    r <- llvm_fresh_var "r" i32;
+    llvm_return (tm r);
 };
 
 let mp_add_spec n = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
     (b, bp) <- ptr_to_fresh_readonly "b" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array n digit_t);
+    cp <- llvm_alloc (llvm_array n digit_t);
 
-    crucible_execute_func [ap, bp, cp, tm {{ `n : [32] }}];
+    llvm_execute_func [ap, bp, cp, tm {{ `n : [32] }}];
 
     points_to_fresh cp "c" (llvm_array n digit_t);
-    ret <- crucible_fresh_var "ret" i32;
-    crucible_return (tm ret);
+    ret <- llvm_fresh_var "ret" i32;
+    llvm_return (tm ret);
 };
 
 let mp_add_single_spec n = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array n digit_t);
+    cp <- llvm_alloc (llvm_array n digit_t);
 
-    crucible_execute_func [ap, ap, cp, tm {{ `n : [32] }}];
+    llvm_execute_func [ap, ap, cp, tm {{ `n : [32] }}];
 
     points_to_fresh cp "c" (llvm_array n digit_t);
-    ret <- crucible_fresh_var "ret" i32;
-    crucible_return (tm ret);
+    ret <- llvm_fresh_var "ret" i32;
+    llvm_return (tm ret);
 };
 
 let mp_add_left_spec n = do {
     (a, ap) <- ptr_to_fresh "a" (llvm_array n digit_t);
     (b, bp) <- ptr_to_fresh_readonly "b" (llvm_array n digit_t);
 
-    crucible_execute_func [ap, bp, ap, tm {{ `n : [32] }}];
+    llvm_execute_func [ap, bp, ap, tm {{ `n : [32] }}];
 
     points_to_fresh ap "c" (llvm_array n digit_t);
-    ret <- crucible_fresh_var "ret" i32;
-    crucible_return (tm ret);
+    ret <- llvm_fresh_var "ret" i32;
+    llvm_return (tm ret);
 };
 
 let mp_sub_spec n = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
     (b, bp) <- ptr_to_fresh_readonly "b" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array n digit_t);
+    cp <- llvm_alloc (llvm_array n digit_t);
 
-    crucible_execute_func [ap, bp, cp, tm {{ `n : [32] }}];
+    llvm_execute_func [ap, bp, cp, tm {{ `n : [32] }}];
 
     points_to_fresh cp "c" (llvm_array n digit_t);
-    ret <- crucible_fresh_var "ret" i32;
-    crucible_return (tm ret);
+    ret <- llvm_fresh_var "ret" i32;
+    llvm_return (tm ret);
 };
 
 let mp_sub_left_spec n = do {
     (a, ap) <- ptr_to_fresh "a" (llvm_array n digit_t);
     (b, bp) <- ptr_to_fresh_readonly "b" (llvm_array n digit_t);
 
-    crucible_execute_func [ap, bp, ap, tm {{ `n : [32] }}];
+    llvm_execute_func [ap, bp, ap, tm {{ `n : [32] }}];
 
     points_to_fresh ap "c" (llvm_array n digit_t);
-    ret <- crucible_fresh_var "ret" i32;
-    crucible_return (tm ret);
+    ret <- llvm_fresh_var "ret" i32;
+    llvm_return (tm ret);
 };
 
 let mp_mul_spec n m = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
     (b, bp) <- ptr_to_fresh_readonly "b" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array m digit_t);
+    cp <- llvm_alloc (llvm_array m digit_t);
 
-    crucible_execute_func [ap, bp, cp, tm {{ `n : [32] }}];
+    llvm_execute_func [ap, bp, cp, tm {{ `n : [32] }}];
 
     points_to_fresh cp "c" (llvm_array m digit_t);
     return ();
@@ -122,9 +122,9 @@ let mp_mul_spec n m = do {
 
 let mp_mul_single_spec n m = do {
     (a, ap) <- ptr_to_fresh_readonly "a" (llvm_array n digit_t);
-    cp <- crucible_alloc (llvm_array m digit_t);
+    cp <- llvm_alloc (llvm_array m digit_t);
 
-    crucible_execute_func [ap, ap, cp, tm {{ `n : [32] }}];
+    llvm_execute_func [ap, ap, cp, tm {{ `n : [32] }}];
 
     points_to_fresh cp "c" (llvm_array m digit_t);
     return ();
@@ -132,7 +132,7 @@ let mp_mul_single_spec n m = do {
 
 let mp_shiftr1_spec n = do {
     (x, xp) <- ptr_to_fresh "x" (llvm_array n digit_t);
-    crucible_execute_func [xp, tm {{ `n : [32] }}];
+    llvm_execute_func [xp, tm {{ `n : [32] }}];
     points_to_fresh xp "x'" (llvm_array n digit_t);
     return ();
 };

@@ -12,44 +12,44 @@ let get_3_isog_spec = do {
     (p, pp) <- A_point_t "P";
     t2p <- C_f2elm_t();
     t3p <- C_f2elm_t();
-    t4p <- crucible_alloc (llvm_array 2 f2elm_t);
-    crucible_execute_func [pp, t2p, t3p, t4p];
-    t2' <- crucible_fresh_var "get_3_isog_t2'" f2elm_t;
-    crucible_points_to t2p (tm t2');
-    t3' <- crucible_fresh_var "get_3_isog_t3'" f2elm_t;
-    crucible_points_to t3p (tm t3');
-    t4' <- crucible_fresh_var "get_3_isog_t4'" (llvm_array 2 f2elm_t);
-    crucible_points_to t4p (tm t4');
+    t4p <- llvm_alloc (llvm_array 2 f2elm_t);
+    llvm_execute_func [pp, t2p, t3p, t4p];
+    t2' <- llvm_fresh_var "get_3_isog_t2'" f2elm_t;
+    llvm_points_to t2p (tm t2');
+    t3' <- llvm_fresh_var "get_3_isog_t3'" f2elm_t;
+    llvm_points_to t3p (tm t3');
+    t4' <- llvm_fresh_var "get_3_isog_t4'" (llvm_array 2 f2elm_t);
+    llvm_points_to t4p (tm t4');
 };
 
 let get_4_isog_spec = do {
     (p, pp) <- A_point_t "P";
     t2p <- C_f2elm_t();
     t3p <- C_f2elm_t();
-    t4p <- crucible_alloc (llvm_array 3 f2elm_t);
-    crucible_execute_func [pp, t2p, t3p, t4p];
-    t2' <- crucible_fresh_var "get_4_isog_t2'" f2elm_t;
-    crucible_points_to t2p (tm t2');
-    t3' <- crucible_fresh_var "get_4_isog_t3'" f2elm_t;
-    crucible_points_to t3p (tm t3');
-    t4' <- crucible_fresh_var "get_4_isog_t4'" (llvm_array 3 f2elm_t);
-    crucible_points_to t4p (tm t4');
+    t4p <- llvm_alloc (llvm_array 3 f2elm_t);
+    llvm_execute_func [pp, t2p, t3p, t4p];
+    t2' <- llvm_fresh_var "get_4_isog_t2'" f2elm_t;
+    llvm_points_to t2p (tm t2');
+    t3' <- llvm_fresh_var "get_4_isog_t3'" f2elm_t;
+    llvm_points_to t3p (tm t3');
+    t4' <- llvm_fresh_var "get_4_isog_t4'" (llvm_array 3 f2elm_t);
+    llvm_points_to t4p (tm t4');
 };
 
 let eval_3_isog_spec = do {
     (q, qp) <- B_point_t "Q";
     (coeff, coeffp) <- ptr_to_fresh_readonly "coeff" (llvm_array 2 f2elm_t);
-    crucible_execute_func [qp, coeffp];
-    q' <- crucible_fresh_var "eval_isog_q'" point_proj_t;
-    crucible_points_to qp (tm q');
+    llvm_execute_func [qp, coeffp];
+    q' <- llvm_fresh_var "eval_isog_q'" point_proj_t;
+    llvm_points_to qp (tm q');
 };
 
 let eval_4_isog_spec = do {
     (q, qp) <- B_point_t  "P";
     (coeff, coeffp) <- ptr_to_fresh_readonly "coeff" (llvm_array 3 f2elm_t);
-    crucible_execute_func [qp, coeffp];
-    q' <- crucible_fresh_var "eval_isog_q'" point_proj_t;
-    crucible_points_to qp (tm q');
+    llvm_execute_func [qp, coeffp];
+    q' <- llvm_fresh_var "eval_isog_q'" point_proj_t;
+    llvm_points_to qp (tm q');
 };
 
 let get_A_spec = do {
@@ -57,31 +57,31 @@ let get_A_spec = do {
     (q, qp) <- A_f2elm_t "xQ";
     (r, rp) <- A_f2elm_t "xR";
     ap <- C_f2elm_t ();
-    crucible_execute_func [pp, qp, rp, ap];
-    a <- crucible_fresh_var "A" f2elm_t;
-    crucible_points_to ap (tm a);
+    llvm_execute_func [pp, qp, rp, ap];
+    a <- llvm_fresh_var "A" f2elm_t;
+    llvm_points_to ap (tm a);
 };
 
 let inv_3_way_spec = do {
     (z1, z1p) <- B_f2elm_t "z1";
     (z2, z2p) <- B_f2elm_t "z2";
     (z3, z3p) <- B_f2elm_t "z3";
-    crucible_execute_func [z1p, z2p, z3p];
-    y1 <- crucible_fresh_var "inv_3_y1" f2elm_t;
-    crucible_points_to z1p (tm y1);
-    y2 <- crucible_fresh_var "inv_3_y2" f2elm_t;
-    crucible_points_to z2p (tm y2);
-    y3 <- crucible_fresh_var "inv_3_y3" f2elm_t;
-    crucible_points_to z3p (tm y3);
+    llvm_execute_func [z1p, z2p, z3p];
+    y1 <- llvm_fresh_var "inv_3_y1" f2elm_t;
+    llvm_points_to z1p (tm y1);
+    y2 <- llvm_fresh_var "inv_3_y2" f2elm_t;
+    llvm_points_to z2p (tm y2);
+    y3 <- llvm_fresh_var "inv_3_y3" f2elm_t;
+    llvm_points_to z3p (tm y3);
 };
 
 let j_inv_spec = do {
     (a, ap) <- A_f2elm_t "A";
     (c, cp) <- A_f2elm_t "C";
     jinvp <- C_f2elm_t();
-    crucible_execute_func [ap, cp, jinvp];
-    jinv <- crucible_fresh_var "jinv" f2elm_t;
-    crucible_points_to jinvp (tm jinv);
+    llvm_execute_func [ap, cp, jinvp];
+    jinv <- llvm_fresh_var "jinv" f2elm_t;
+    llvm_points_to jinvp (tm jinv);
 };
 
 let xDBLADD_spec = do {
@@ -89,23 +89,23 @@ let xDBLADD_spec = do {
     (q, qp) <- B_point_t  "Q";
     (t3, t3p) <- A_f2elm_t "xPQ";
     (t4, t4p) <- A_f2elm_t "A24";
-    crucible_execute_func [pp, qp, t3p, t4p];
-    p' <- crucible_fresh_var "xDBLADD_p'" point_proj_t;
-    crucible_points_to pp (tm p');
-    q' <- crucible_fresh_var "xDBLADD_q'" point_proj_t;
-    crucible_points_to qp (tm q');
+    llvm_execute_func [pp, qp, t3p, t4p];
+    p' <- llvm_fresh_var "xDBLADD_p'" point_proj_t;
+    llvm_points_to pp (tm p');
+    q' <- llvm_fresh_var "xDBLADD_q'" point_proj_t;
+    llvm_points_to qp (tm q');
 };
 
 let swap_points_spec = do {
     (p, pp) <- B_point_t "P";
     (q, qp) <- B_point_t  "Q";
-    t <- crucible_fresh_var "option" (llvm_int 64);
-    crucible_precond {{ t == 0 \/ t == -1 }};
-    crucible_execute_func [pp, qp, tm t];
-    p' <- crucible_fresh_var "p'_swap" point_proj_t;
-    q' <- crucible_fresh_var "q'_swap" point_proj_t;
-    crucible_points_to pp (tm p');
-    crucible_points_to qp (tm q');
+    t <- llvm_fresh_var "option" (llvm_int 64);
+    llvm_precond {{ t == 0 \/ t == -1 }};
+    llvm_execute_func [pp, qp, tm t];
+    p' <- llvm_fresh_var "p'_swap" point_proj_t;
+    q' <- llvm_fresh_var "q'_swap" point_proj_t;
+    llvm_points_to pp (tm p');
+    llvm_points_to qp (tm q');
 };
 
 let LADDER3PT_spec is_bob = do {
@@ -116,7 +116,7 @@ let LADDER3PT_spec is_bob = do {
     r_ptr <- C_point_t (); // "R"
     (a, a_ptr) <- A_f2elm_t "A";
 
-    crucible_execute_func
+    llvm_execute_func
       [ xP_ptr
       , xQ_ptr
       , xPQ_ptr
@@ -126,8 +126,8 @@ let LADDER3PT_spec is_bob = do {
       , a_ptr
       ];
 
-    res_r <- crucible_fresh_var "LADDER3PT_R" point_proj_t;
-    crucible_points_to r_ptr (tm res_r);
+    res_r <- llvm_fresh_var "LADDER3PT_R" point_proj_t;
+    llvm_points_to r_ptr (tm res_r);
 };
 
 

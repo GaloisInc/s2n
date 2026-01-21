@@ -6,31 +6,31 @@
 // Specifications
 
 let aes256_key_expansion_spec = do {
-  ks_ptr <- crucible_alloc aes256_ks_t;
+  ks_ptr <- llvm_alloc aes256_ks_t;
   (_, key_ptr) <- in_ref aes256_key_t "key";
-  crucible_execute_func [ks_ptr, key_ptr];
+  llvm_execute_func [ks_ptr, key_ptr];
   (_, ctx_ptr) <- ptr_to_fresh "ctx" evp_cipher_ctx_st_t;
-  crucible_points_to ks_ptr ctx_ptr;
-  crucible_return (tm {{ fromInteger`{[32]} SUCCESS }});
+  llvm_points_to ks_ptr ctx_ptr;
+  llvm_return (tm {{ fromInteger`{[32]} SUCCESS }});
 };
 
 let aes256_enc_spec = do {
   ct_ptr <- out_ref (i8_array_t AES256_BLOCK_SIZE);
   (_, pt_ptr) <- in_ref (i8_array_t AES256_BLOCK_SIZE) "pt";
-  ks_ptr <- crucible_alloc_readonly aes256_ks_t;
+  ks_ptr <- llvm_alloc_readonly aes256_ks_t;
   (_, ctx_ptr) <- ptr_to_fresh "ctx" evp_cipher_ctx_st_t;
-  crucible_points_to ks_ptr ctx_ptr;
-  crucible_execute_func [ct_ptr, pt_ptr, ks_ptr];
+  llvm_points_to ks_ptr ctx_ptr;
+  llvm_execute_func [ct_ptr, pt_ptr, ks_ptr];
   _ <- point_to (i8_array_t AES256_BLOCK_SIZE) ct_ptr "ct";
   _ <- point_to evp_cipher_ctx_st_t ctx_ptr "ctx'";
-  crucible_return (tm {{ fromInteger`{[32]} SUCCESS }});
+  llvm_return (tm {{ fromInteger`{[32]} SUCCESS }});
 };
 
 let aes256_free_ks_spec = do {
-  ks_ptr <- crucible_alloc aes256_ks_t;
+  ks_ptr <- llvm_alloc aes256_ks_t;
   (_, ctx_ptr) <- ptr_to_fresh "ctx" evp_cipher_ctx_st_t;
-  crucible_points_to ks_ptr ctx_ptr;
-  crucible_execute_func [ks_ptr];
+  llvm_points_to ks_ptr ctx_ptr;
+  llvm_execute_func [ks_ptr];
 };
 
 /* NOTE: interesting features of aes_ctr_prf:
@@ -55,56 +55,56 @@ let aes256_free_ks_spec = do {
 */
 
 let init_aes_ctr_prf_state_spec = do {
-  s_ptr <- crucible_alloc aes_ctr_prf_state_t;
-  max_invokations <- crucible_fresh_var "max_invokations" i32;
+  s_ptr <- llvm_alloc aes_ctr_prf_state_t;
+  max_invokations <- llvm_fresh_var "max_invokations" i32;
   (_, seed_ptr) <- in_ref seed_t "seed";
 
-  crucible_precond {{ max_invokations > 0 }};
+  llvm_precond {{ max_invokations > 0 }};
 
-  crucible_execute_func [s_ptr, tm max_invokations, seed_ptr];
+  llvm_execute_func [s_ptr, tm max_invokations, seed_ptr];
 
-  ctx_ptr <- crucible_alloc evp_cipher_ctx_st_t;
+  ctx_ptr <- llvm_alloc evp_cipher_ctx_st_t;
   s <- points_to_fresh_aes_ctr_prf_state s_ptr ctx_ptr "s";
 
-  crucible_postcond {{ s.rem_invokations == max_invokations }};
-  crucible_postcond {{ s.pos == `AES256_BLOCK_SIZE }};
+  llvm_postcond {{ s.rem_invokations == max_invokations }};
+  llvm_postcond {{ s.pos == `AES256_BLOCK_SIZE }};
 
-  crucible_return (tm {{fromInteger`{[32]} SUCCESS}});
+  llvm_return (tm {{fromInteger`{[32]} SUCCESS}});
 };
 
 let aes_ctr_prf_spec len check_rem_invokations = do {
   a_ptr <- out_ref (i8_array_t len);
   (s, s_ptr, ctx_ptr) <- ptr_to_fresh_aes_ctr_prf_state "s";
 
-  crucible_precond {{ s.pos <= `AES256_BLOCK_SIZE }};
+  llvm_precond {{ s.pos <= `AES256_BLOCK_SIZE }};
 
   if check_rem_invokations then do {
-    crucible_precond {{ s.rem_invokations >= `(len / AES256_BLOCK_SIZE) + 1 }};
+    llvm_precond {{ s.rem_invokations >= `(len / AES256_BLOCK_SIZE) + 1 }};
   } else do {
     return ();
   };
 
-  crucible_precond {{ `len < 2^^32 - `AES256_BLOCK_SIZE }};
+  llvm_precond {{ `len < 2^^32 - `AES256_BLOCK_SIZE }};
 
-  crucible_execute_func [a_ptr, s_ptr, tm {{ `len : [32] }}];
+  llvm_execute_func [a_ptr, s_ptr, tm {{ `len : [32] }}];
 
   _ <- point_to (i8_array_t len) a_ptr "a";
   s' <- points_to_fresh_aes_ctr_prf_state s_ptr ctx_ptr "s'";
 
-  crucible_postcond {{ s'.pos <= `AES256_BLOCK_SIZE }};
+  llvm_postcond {{ s'.pos <= `AES256_BLOCK_SIZE }};
 
   if check_rem_invokations then do {
-    crucible_postcond {{ s'.rem_invokations >= s.rem_invokations - `(len / AES256_BLOCK_SIZE) - 1 }};
+    llvm_postcond {{ s'.rem_invokations >= s.rem_invokations - `(len / AES256_BLOCK_SIZE) - 1 }};
   } else do {
     return ();
   };
 
-  crucible_return (tm {{fromInteger`{[32]} SUCCESS}});
+  llvm_return (tm {{fromInteger`{[32]} SUCCESS}});
 };
 
 let finalize_aes_ctr_prf_spec = do {
   (_, s_ptr, _) <- ptr_to_fresh_aes_ctr_prf_state "s";
-  crucible_execute_func [s_ptr];
+  llvm_execute_func [s_ptr];
 };
 
 

@@ -7,30 +7,30 @@
 
 // EVP specs
 let EVP_CIPHER_CTX_new_spec = do {
-  crucible_execute_func [];
+  llvm_execute_func [];
   (_, ctx_ptr) <- inout_ref evp_cipher_ctx_st_t "ctx";
-  crucible_return ctx_ptr;
+  llvm_return ctx_ptr;
 };
 
 let EVP_CIPHER_CTX_free_spec = do {
   (_, ctx_ptr) <- inout_ref evp_cipher_ctx_st_t "ctx";
-  crucible_execute_func [ctx_ptr];
+  llvm_execute_func [ctx_ptr];
 };
 
 let EVP_CIPHER_CTX_set_padding_spec = do {
   (_, ctx_ptr) <- inout_ref evp_cipher_ctx_st_t "ctx";
-  crucible_execute_func [ctx_ptr, tm {{ zero : [32] }}];
+  llvm_execute_func [ctx_ptr, tm {{ zero : [32] }}];
   _ <- point_to evp_cipher_ctx_st_t ctx_ptr "ctx'";
-  crucible_return (tm {{ 1 : [32] }});
+  llvm_return (tm {{ 1 : [32] }});
 };
 
 let EVP_EncryptInit_ex_spec = do {
   (_, ctx_ptr) <- inout_ref evp_cipher_ctx_st_t "ctx";
   (_, type_ptr) <- in_ref evp_cipher_st_t "type";
   (_, key_ptr) <- in_ref (i8_array_t AES256_KEY_SIZE) "key";
-  crucible_execute_func [ctx_ptr, type_ptr, crucible_null, key_ptr, crucible_null];
+  llvm_execute_func [ctx_ptr, type_ptr, llvm_null, key_ptr, llvm_null];
   _ <- point_to evp_cipher_ctx_st_t ctx_ptr "ctx'";
-  crucible_return (tm {{ 1 : [32] }});
+  llvm_return (tm {{ 1 : [32] }});
 };
 
 let EVP_EncryptUpdate_spec = do {
@@ -38,25 +38,25 @@ let EVP_EncryptUpdate_spec = do {
   out_ptr <- out_ref (i8_array_t AES256_BLOCK_SIZE);
   outl_ptr <- out_ref i32;
   (_, in_ptr) <- in_ref (i8_array_t AES256_BLOCK_SIZE) "in";
-  crucible_execute_func [ctx_ptr, out_ptr, outl_ptr, in_ptr, tm {{ `AES256_BLOCK_SIZE : [32] }}];
+  llvm_execute_func [ctx_ptr, out_ptr, outl_ptr, in_ptr, tm {{ `AES256_BLOCK_SIZE : [32] }}];
   _ <- point_to evp_cipher_ctx_st_t ctx_ptr "ctx'";
   _ <- point_to (i8_array_t AES256_BLOCK_SIZE) out_ptr "out";
-  crucible_return (tm {{ 1 : [32] }});
+  llvm_return (tm {{ 1 : [32] }});
 };
 
 let EVP_aes_256_ecb_spec = do {
-  crucible_execute_func [];
+  llvm_execute_func [];
   (_, type_ptr) <- inout_ref evp_cipher_st_t "type";
-  crucible_return type_ptr;
+  llvm_return type_ptr;
 };
 
 // SHA384 spec
 let sha384_spec len = do {
   (_, mp) <- in_ref (i8_array_t len) "m";
   rp <- out_ref (i8_array_t SHA384_HASH_SIZE);
-  crucible_execute_func [mp, tm {{ `len:[64] }}, rp];
+  llvm_execute_func [mp, tm {{ `len:[64] }}, rp];
   _ <- point_to (i8_array_t SHA384_HASH_SIZE) rp "r";
-  crucible_return rp;
+  llvm_return rp;
 };
 
 

@@ -36,33 +36,33 @@ print "Loaded bitcode via Crucible";
 ////////////////////////////////////////////////////////////////
 
 //conn->corked_io
-let conn_corked_io pconn = crucible_field pconn "corked_io";
+let conn_corked_io pconn = llvm_field pconn "corked_io";
 
 //conn->mode
-let conn_mode pconn = crucible_field pconn "mode";
+let conn_mode pconn = llvm_field pconn "mode";
 
 //conn->secure.cipher_suite->key_exchange_alg->flags
 let conn_secure_cipher_suite pconn =
-    (crucible_field (crucible_field pconn "secure") "cipher_suite");
+    (llvm_field (llvm_field pconn "secure") "cipher_suite");
 
-//let key_exchange_algorithm csuite = crucible_elem csuite 3;
-let key_exchange_algorithm csuite = crucible_field csuite "key_exchange_alg";
+//let key_exchange_algorithm csuite = llvm_elem csuite 3;
+let key_exchange_algorithm csuite = llvm_field csuite "key_exchange_alg";
 
-let kea_is_ephemeral kea = crucible_elem kea 0;
-//let kea_is_ephemeral kea = crucible_field kea "is_ephemeral";
+let kea_is_ephemeral kea = llvm_elem kea 0;
+//let kea_is_ephemeral kea = llvm_field kea "is_ephemeral";
 
 //conn->status_type
-let conn_status_type pconn = crucible_field pconn "status_type";
+let conn_status_type pconn = llvm_field pconn "status_type";
 
-//let conn_config pconn = crucible_elem pconn 0;
-let conn_config pconn = crucible_field pconn "config";
+//let conn_config pconn = llvm_elem pconn 0;
+let conn_config pconn = llvm_field pconn "config";
 
 //conn->config -> client_cert_auth_type
-let config_cca_type config = (crucible_field config "client_cert_auth_type");
+let config_cca_type config = (llvm_field config "client_cert_auth_type");
 
 //conn->handshake_params.our_chain_and_key->ocsp_status.size
 let ocsp_status_size cert_and_key =
-    crucible_field (crucible_field (cert_and_key) "ocsp_status") "size";
+    llvm_field (llvm_field (cert_and_key) "ocsp_status") "size";
 
 //conn->config->use_tickets is the field we care about, but it is
 // in a bitfield. For now, we only care about that, so we point
@@ -72,35 +72,35 @@ let ocsp_status_size cert_and_key =
 // compositional proofs in the future, but we can make more
 // precise statements at that time
 
-// It's also noteworthy that we use the crucible_elem here, which will
+// It's also noteworthy that we use the llvm_elem here, which will
 // cause problems if the fields are reordered. This is reasonably unlikely
 // because it makes sense to have the bitfield at the start
-let config_bitfield config = (crucible_elem config 0);
+let config_bitfield config = (llvm_elem config 0);
 
 //conn->session_ticket_status
-let conn_session_ticket_status pconn = (crucible_field pconn "session_ticket_status");
+let conn_session_ticket_status pconn = (llvm_field pconn "session_ticket_status");
 
 //conn->client_cert_auth_type
-let cca_type pconn = crucible_field pconn "client_cert_auth_type";
+let cca_type pconn = llvm_field pconn "client_cert_auth_type";
 
 //conn->client_cert_auth_type_overridden
-let cca_type_ov pconn = crucible_field pconn "client_cert_auth_type_overridden";
+let cca_type_ov pconn = llvm_field pconn "client_cert_auth_type_overridden";
 
 //conn->handshake.handshake_type
 let conn_handshake_handshake_type pconn =
-    crucible_field (crucible_field pconn "handshake") "handshake_type";
+    llvm_field (llvm_field pconn "handshake") "handshake_type";
 
 //conn->handshake.message_number
 let conn_handshake_message_number pconn =
-    crucible_field (crucible_field pconn "handshake") "message_number";
+    llvm_field (llvm_field pconn "handshake") "message_number";
 
 //conn->handshake_params.our_chain_and_key
 let conn_chain_and_key pconn =
-    crucible_field (crucible_field pconn "handshake_params") "our_chain_and_key";
+    llvm_field (llvm_field pconn "handshake_params") "our_chain_and_key";
 
 // Ghost state that represents the number of times the connection write socket
 // has been corked/uncorked. 
-corked <- crucible_declare_ghost_state "corked";
+corked <- declare_ghost_state "corked";
 
 // It's a nice idea to initialize the ghost state, but it doesn't work
 // that way. Ghost state doesn't actually exist except inside a
@@ -111,71 +111,71 @@ corked <- crucible_declare_ghost_state "corked";
 // setup_handshake de-serializes parts of the s2n_handshake and s2n_connection
 // structs into a Cryptol record. It also deserializes the ghost state.
 let setup_connection = do {
-   pconn <- crucible_alloc (llvm_alias "struct.s2n_connection");
+   pconn <- llvm_alloc (llvm_alias "struct.s2n_connection");
    
    // we assume that corking/uncorking is managed by s2n
    let corked_io = {{1 : [8]}};
-   crucible_points_to (conn_corked_io pconn) (crucible_term corked_io); 
+   llvm_points_to (conn_corked_io pconn) (llvm_term corked_io); 
    
    // TLS1.3 is temporarily removed from SAW testing, force the TLS1.2 version
    let version = {{33 : [8]}};
-   crucible_points_to (crucible_field pconn "actual_protocol_version") (crucible_term version);
+   llvm_points_to (llvm_field pconn "actual_protocol_version") (llvm_term version);
    
-   mode <- crucible_fresh_var "mode" (llvm_int 32);
-   crucible_points_to (conn_mode pconn) (crucible_term mode);
+   mode <- llvm_fresh_var "mode" (llvm_int 32);
+   llvm_points_to (conn_mode pconn) (llvm_term mode);
    
-   handshake_type <- crucible_fresh_var "handshake_type" (llvm_int 32);
-   crucible_points_to (conn_handshake_handshake_type pconn)
-                      (crucible_term handshake_type); 
+   handshake_type <- llvm_fresh_var "handshake_type" (llvm_int 32);
+   llvm_points_to (conn_handshake_handshake_type pconn)
+                      (llvm_term handshake_type); 
 
-   message_number <- crucible_fresh_var "message_number" (llvm_int 32);
-   crucible_points_to (conn_handshake_message_number pconn)
-                      (crucible_term message_number);
+   message_number <- llvm_fresh_var "message_number" (llvm_int 32);
+   llvm_points_to (conn_handshake_message_number pconn)
+                      (llvm_term message_number);
 
-   cork_val <- crucible_fresh_var "corked" (llvm_int 2);
-   crucible_ghost_value corked cork_val;
+   cork_val <- llvm_fresh_var "corked" (llvm_int 2);
+   llvm_ghost_value corked cork_val;
 
-   cca_ov <- crucible_fresh_var "cca_ov" (llvm_int 8);
-   crucible_points_to (cca_type_ov pconn) (crucible_term cca_ov);
+   cca_ov <- llvm_fresh_var "cca_ov" (llvm_int 8);
+   llvm_points_to (cca_type_ov pconn) (llvm_term cca_ov);
 
-   cca <- crucible_fresh_var "cca" (llvm_int 32);
-   crucible_points_to (cca_type pconn) (crucible_term cca);
+   cca <- llvm_fresh_var "cca" (llvm_int 32);
+   llvm_points_to (cca_type pconn) (llvm_term cca);
 
-   cipher_suite <- crucible_alloc (llvm_alias "struct.s2n_cipher_suite");
-   crucible_points_to (conn_secure_cipher_suite pconn)  cipher_suite;
+   cipher_suite <- llvm_alloc (llvm_alias "struct.s2n_cipher_suite");
+   llvm_points_to (conn_secure_cipher_suite pconn)  cipher_suite;
 
-   kea <- crucible_alloc (llvm_alias "struct.s2n_kex");
-   crucible_points_to (key_exchange_algorithm cipher_suite) kea;
+   kea <- llvm_alloc (llvm_alias "struct.s2n_kex");
+   llvm_points_to (key_exchange_algorithm cipher_suite) kea;
 
-   eph_flag <- crucible_fresh_var "eph_flag" (llvm_int 8);
-   crucible_points_to (kea_is_ephemeral kea) (crucible_term eph_flag);
+   eph_flag <- llvm_fresh_var "eph_flag" (llvm_int 8);
+   llvm_points_to (kea_is_ephemeral kea) (llvm_term eph_flag);
 
-   config <- crucible_alloc (llvm_alias "struct.s2n_config");
-   crucible_points_to (conn_config pconn) config;
+   config <- llvm_alloc (llvm_alias "struct.s2n_config");
+   llvm_points_to (conn_config pconn) config;
 
-   config_cca <- crucible_fresh_var "config_cca" (llvm_int 32);
-   crucible_points_to (config_cca_type config) (crucible_term config_cca);
+   config_cca <- llvm_fresh_var "config_cca" (llvm_int 32);
+   llvm_points_to (config_cca_type config) (llvm_term config_cca);
 
-   cak <- crucible_alloc (llvm_alias "struct.s2n_cert_chain_and_key");
-   crucible_points_to (conn_chain_and_key pconn) cak;
+   cak <- llvm_alloc (llvm_alias "struct.s2n_cert_chain_and_key");
+   llvm_points_to (conn_chain_and_key pconn) cak;
 
-   status_size <- crucible_fresh_var "status_size" (llvm_int 32);
-   crucible_points_to (ocsp_status_size cak) (crucible_term status_size);
-   crucible_equal (crucible_term status_size) (crucible_term {{zero : [32]}});
+   status_size <- llvm_fresh_var "status_size" (llvm_int 32);
+   llvm_points_to (ocsp_status_size cak) (llvm_term status_size);
+   llvm_equal (llvm_term status_size) (llvm_term {{zero : [32]}});
 
-   config_bitfield_value <- crucible_fresh_var "config_bitfield" (llvm_int 8);
-   crucible_points_to (config_bitfield config) (crucible_term config_bitfield_value);
+   config_bitfield_value <- llvm_fresh_var "config_bitfield" (llvm_int 8);
+   llvm_points_to (config_bitfield config) (llvm_term config_bitfield_value);
    // The following line could be made more precise, we only care that the use_tickets
    // bit is zero 
-   crucible_equal (crucible_term config_bitfield_value) (crucible_term {{zero : [8]}});
+   llvm_equal (llvm_term config_bitfield_value) (llvm_term {{zero : [8]}});
 
-   session_ticket_status <- crucible_fresh_var "session_ticket_status" (llvm_int 32);
-   crucible_points_to (conn_session_ticket_status pconn) (crucible_term session_ticket_status);
+   session_ticket_status <- llvm_fresh_var "session_ticket_status" (llvm_int 32);
+   llvm_points_to (conn_session_ticket_status pconn) (llvm_term session_ticket_status);
 
-   ocsp_flag <- crucible_fresh_var "ocsp_flag" (llvm_int 32);
-   crucible_points_to (conn_status_type pconn) (crucible_term ocsp_flag);
+   ocsp_flag <- llvm_fresh_var "ocsp_flag" (llvm_int 32);
+   llvm_points_to (conn_status_type pconn) (llvm_term ocsp_flag);
 
-   no_client_cert <- crucible_fresh_var "no_client_cert" (llvm_int 8);
+   no_client_cert <- llvm_fresh_var "no_client_cert" (llvm_int 8);
 
    let client_cert_auth_type = {{ if cca_ov != 0 then cca else config_cca }};
 
@@ -209,45 +209,45 @@ let verify_state_machine_elem state_machine state_machine_model index_term = do 
     let index = eval_int index_term;
     let abstract = {{ state_machine_model @ index_term }};
 
-    crucible_points_to (crucible_elem (crucible_elem state_machine index) 0) (crucible_term {{ abstract.record_type }});
+    llvm_points_to (llvm_elem (llvm_elem state_machine index) 0) (llvm_term {{ abstract.record_type }});
 
-    crucible_points_to (crucible_elem (crucible_elem state_machine index) 1) (crucible_term {{ abstract.message_type }});
+    llvm_points_to (llvm_elem (llvm_elem state_machine index) 1) (llvm_term {{ abstract.message_type }});
 
-    crucible_points_to (crucible_elem (crucible_elem state_machine index) 2) (crucible_term {{ abstract.writer }});
+    llvm_points_to (llvm_elem (llvm_elem state_machine index) 2) (llvm_term {{ abstract.writer }});
 
 };
 
 // For now axiomitize this is always false and see if we can prove something
 let s2n_allowed_to_cache_connection_spec = do {
-    pconf <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
+    pconf <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
 
-    crucible_execute_func [pconf];
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_execute_func [pconf];
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 
 let s2n_connection_get_client_auth_type_spec = do{
 
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
-    auth_type <- crucible_alloc (llvm_int 32);
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
+    auth_type <- llvm_alloc (llvm_int 32);
 
-    cca_ov <- crucible_fresh_var "cca_ov" (llvm_int 8);
-    crucible_points_to (cca_type_ov pconn) (crucible_term cca_ov);
+    cca_ov <- llvm_fresh_var "cca_ov" (llvm_int 8);
+    llvm_points_to (cca_type_ov pconn) (llvm_term cca_ov);
 
-    config <- crucible_alloc_readonly (llvm_alias "struct.s2n_config");
-    crucible_points_to (conn_config pconn) config;
+    config <- llvm_alloc_readonly (llvm_alias "struct.s2n_config");
+    llvm_points_to (conn_config pconn) config;
 
-    config_cca <- crucible_fresh_var "config_cca" (llvm_int 32);
-    crucible_points_to (config_cca_type config) (crucible_term config_cca);
+    config_cca <- llvm_fresh_var "config_cca" (llvm_int 32);
+    llvm_points_to (config_cca_type config) (llvm_term config_cca);
 
-    cca <- crucible_fresh_var "cca" (llvm_int 32);
-    crucible_points_to (cca_type pconn) (crucible_term cca);
+    cca <- llvm_fresh_var "cca" (llvm_int 32);
+    llvm_points_to (cca_type pconn) (llvm_term cca);
 
-    crucible_execute_func [pconn, auth_type];
+    llvm_execute_func [pconn, auth_type];
 
-    crucible_points_to (auth_type) (crucible_term {{if cca_ov != zero then cca else config_cca}});
+    llvm_points_to (auth_type) (llvm_term {{if cca_ov != zero then cca else config_cca}});
 
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 
 };
 
@@ -260,10 +260,10 @@ let s2n_conn_set_handshake_type_spec = do {
     // "handshakes")
     // conn.handshake is defined in s2n_handshake_io.cry.
     // valid_handshake is defined in s2n_handshake_io.cry as well.
-    crucible_precond {{ valid_handshake conn.handshake }};
+    llvm_precond {{ valid_handshake conn.handshake }};
 
     // symbolically execute s2n_conn_set_handshake_type
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
     // Next we check that the changes to s2n_connection fields are
     // simulated by the low-level specification of the function. We do
@@ -273,12 +273,12 @@ let s2n_conn_set_handshake_type_spec = do {
     // of the post-state of the s2n_connection struct. In this case only handshake
     // type should change
     let conn' = {{ conn_set_handshake_type conn }};
-    crucible_ghost_value corked {{ conn'.corked }};
-    crucible_points_to (conn_handshake_handshake_type pconn) (crucible_term {{ conn'.handshake.handshake_type }});
+    llvm_ghost_value corked {{ conn'.corked }};
+    llvm_points_to (conn_handshake_handshake_type pconn) (llvm_term {{ conn'.handshake.handshake_type }});
 
     // assert that s2n_conn_set_handshake_type returns 0 (true if the 4
     // functions it calls don't fail)
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 // specification for s2n_advance_message that sets up simulation of it
@@ -288,10 +288,10 @@ let s2n_advance_message_spec = do {
     // we assume that the handshake struct denotes a valid handshake state
     // (e.g. it will not index out of bounds in the state transition array
     // "handshakes")
-    crucible_precond {{ valid_handshake conn.handshake }};
+    llvm_precond {{ valid_handshake conn.handshake }};
 
     // symbolically execute s2n_advance_message
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
     // Next we check that the changes to s2n_connection fields are
     // simulated by the low-level specification of the function. We do
@@ -300,33 +300,33 @@ let s2n_advance_message_spec = do {
     // that values of the fields of the resulting struct match the fields
     // of the post-state of the s2n_connection struct.
     let conn' = {{ advance_message conn }};
-    crucible_ghost_value corked {{ conn'.corked }};
-    crucible_points_to (conn_corked_io pconn) (crucible_term {{ conn'.corked_io }});
-    crucible_points_to (conn_mode pconn) (crucible_term {{ conn'.mode }});
-    crucible_points_to (conn_handshake_handshake_type pconn) (crucible_term {{ conn'.handshake.handshake_type }});
-    crucible_points_to (conn_handshake_message_number pconn) (crucible_term {{ conn'.handshake.message_number }});
+    llvm_ghost_value corked {{ conn'.corked }};
+    llvm_points_to (conn_corked_io pconn) (llvm_term {{ conn'.corked_io }});
+    llvm_points_to (conn_mode pconn) (llvm_term {{ conn'.mode }});
+    llvm_points_to (conn_handshake_handshake_type pconn) (llvm_term {{ conn'.handshake.handshake_type }});
+    llvm_points_to (conn_handshake_message_number pconn) (llvm_term {{ conn'.handshake.message_number }});
 
     // make sure the low-level spec representation of the declarative
     // handshake/cork-uncork state machine is equivalent to the one in
     // s2n
     // The Cryptol representations are defined here: tests/saw/spec/handshake/s2n_handshake_io.cry
-    crucible_points_to (crucible_global "handshakes") (crucible_term {{ handshakes }});
+    llvm_points_to (llvm_global "handshakes") (llvm_term {{ handshakes }});
 
     // TLS1.3 is temporarily removed from SAW testing.
-    // crucible_points_to (crucible_global "tls13_handshakes") (crucible_term {{ tls13_handshakes }});
+    // llvm_points_to (llvm_global "tls13_handshakes") (llvm_term {{ tls13_handshakes }});
     
     let messages = [ {{CLIENT_HELLO : [5]}}, {{SERVER_HELLO : [5]}}, {{SERVER_CERT : [5]}}, {{SERVER_NEW_SESSION_TICKET : [5]}}, {{SERVER_CERT_STATUS : [5]}}, 
       {{SERVER_KEY : [5]}}, {{SERVER_CERT : [5]}}, {{SERVER_CERT_REQ : [5]}}, {{SERVER_HELLO_DONE : [5]}}, {{CLIENT_CERT : [5]}}, {{CLIENT_KEY : [5]}}, {{CLIENT_CERT_VERIFY : [5]}}, 
       {{CLIENT_CHANGE_CIPHER_SPEC : [5]}}, {{SERVER_FINISHED : [5]}}, {{ENCRYPTED_EXTENSIONS : [5]}}, {{SERVER_CERT_VERIFY : [5]}}, {{APPLICATION_DATA : [5]}} ];
 
-    for messages (verify_state_machine_elem (crucible_global "state_machine") {{ state_machine }} );
+    for messages (verify_state_machine_elem (llvm_global "state_machine") {{ state_machine }} );
 
     // TLS1.3 is temporarily removed from SAW testing.
-    // for messages (verify_state_machine_elem (crucible_global "tls13_state_machine") {{ tls13_state_machine }} );
+    // for messages (verify_state_machine_elem (llvm_global "tls13_state_machine") {{ tls13_state_machine }} );
 
     // assert that s2n_advance_message returns 0 (true if the 4
     // functions it calls don't fail)
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 // Specs for the 5 functions that s2n_advance_message calls. Right now
@@ -338,50 +338,50 @@ let s2n_advance_message_spec = do {
 // that it decrements the 'corked' ghost variable to indicate that the socket
 // has been uncorked.
 let s2n_socket_write_uncork_spec = do {
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
-    cork_val <- crucible_fresh_var "corked" (llvm_int 2);
-    crucible_ghost_value corked cork_val;
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
+    cork_val <- llvm_fresh_var "corked" (llvm_int 2);
+    llvm_ghost_value corked cork_val;
 
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
-    crucible_ghost_value corked {{ cork_val - 1 }};
+    llvm_ghost_value corked {{ cork_val - 1 }};
 
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 // Specification for s2n_generate_new_client_session_id. This is essentially
 // a noop function that returns 0 from the perspective of our current proof
 let s2n_generate_new_client_session_id_spec = do {
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
    
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 // Specification for s2n_decrypt_session_ticket_spec. This is essentially
 // a noop function that returns 0 from the perspective of our current proof
 let s2n_decrypt_session_ticket_spec = do {
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
 
-    crucible_execute_func [pconn];
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_execute_func [pconn];
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 // Specification for s2n_socket_write_cork. The relevant part is
 // that it increments the 'corked' ghost variable to 1 to
 // indicate that the socket has been corked.
 let s2n_socket_write_cork_spec = do {
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
 
-    cork_val <- crucible_fresh_var "corked" (llvm_int 2);
-    crucible_ghost_value corked cork_val;
+    cork_val <- llvm_fresh_var "corked" (llvm_int 2);
+    llvm_ghost_value corked cork_val;
 
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
-    crucible_ghost_value corked {{ cork_val + 1 }};
+    llvm_ghost_value corked {{ cork_val + 1 }};
 
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 // Specification for s2n_socket_was_corked.  We assume this function
@@ -389,22 +389,22 @@ let s2n_socket_write_cork_spec = do {
 // uncorked initially. If it was corked, then the cork/uncork state
 // machine would be bypassed, making verification moot.
 let s2n_socket_was_corked_spec = do {
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
 
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 
 // Specification for s2n_socket_quickack. This is essentially
 // a noop function that returns 0 from the perspective of our current proof
 let s2n_socket_quickack_spec = do {
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
 
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
-    crucible_return (crucible_term {{ 0 : [32] }});
+    llvm_return (llvm_term {{ 0 : [32] }});
 };
 
 
@@ -413,9 +413,9 @@ let s2n_socket_quickack_spec = do {
 // managing the corking and uncorking of the socket. Otherwise, the
 //cork/uncork state machine would be bypassed making verification moot.
 let s2n_connection_is_managed_corked_spec = do {
-    pconn <- crucible_alloc_readonly (llvm_alias "struct.s2n_connection");
+    pconn <- llvm_alloc_readonly (llvm_alias "struct.s2n_connection");
 
-    crucible_execute_func [pconn];
+    llvm_execute_func [pconn];
 
-    crucible_return (crucible_term {{ 1 : [32] }});
+    llvm_return (llvm_term {{ 1 : [32] }});
 };

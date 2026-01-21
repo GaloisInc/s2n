@@ -8,7 +8,7 @@
 let parallel_hash_spec n = do {
   out_hash_ptr <- out_ref sha384_hash_t;
   (_, m_ptr) <- in_ref (i8_array_t n) "m";
-  crucible_execute_func [out_hash_ptr, m_ptr, tm {{ `n:[32] }}];
+  llvm_execute_func [out_hash_ptr, m_ptr, tm {{ `n:[32] }}];
   _ <- point_to sha384_hash_t out_hash_ptr "parallel_hash_out_hash'";
   return ();
 };

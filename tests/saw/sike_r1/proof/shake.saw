@@ -11,39 +11,39 @@ let state_t = llvm_array 25 digit_t;
 
 let load64_spec = do {
     (x, xp) <- ptr_to_fresh_readonly "x" (llvm_array 8 char_t);
-    crucible_execute_func [xp];
-    r <- crucible_fresh_var "r" i64;
-    crucible_return (tm r);
+    llvm_execute_func [xp];
+    r <- llvm_fresh_var "r" i64;
+    llvm_return (tm r);
 };
 
 let store64_spec = do {
-    xp <- crucible_alloc (llvm_array 8 char_t);
-    u <- crucible_fresh_var "u" i64;
-    crucible_execute_func [xp, tm u];
-    x <- crucible_fresh_var "x" (llvm_array 8 char_t);
-    crucible_points_to xp (tm x);
+    xp <- llvm_alloc (llvm_array 8 char_t);
+    u <- llvm_fresh_var "u" i64;
+    llvm_execute_func [xp, tm u];
+    x <- llvm_fresh_var "x" (llvm_array 8 char_t);
+    llvm_points_to xp (tm x);
 };
 
 let KeccakF1600_StatePermute_spec = do {
     (s, sp) <- ptr_to_fresh "state" state_t;
-    crucible_execute_func [sp];
-    res_s <- crucible_fresh_var "res_s" state_t;
-    crucible_points_to sp (tm res_s);
+    llvm_execute_func [sp];
+    res_s <- llvm_fresh_var "res_s" state_t;
+    llvm_points_to sp (tm res_s);
 };
 
 let shake256_spec outsz insz = do {
-    outp <- crucible_alloc (llvm_array outsz char_t);
+    outp <- llvm_alloc (llvm_array outsz char_t);
     (input, inputp) <- ptr_to_fresh_readonly "in" (llvm_array insz char_t);
     if eval_bool {{ `SIKE_REVISION == (2:[10]) }} then do {
-        crucible_execute_func
+        llvm_execute_func
             [ outp
             , tm {{ (`outsz : [64]) }}
             , inputp
             , tm {{ `insz:[64] }}
             ];
     } else do {
-        cstm <- crucible_fresh_var "cstm" i16;
-        crucible_execute_func
+        cstm <- llvm_fresh_var "cstm" i16;
+        llvm_execute_func
             [ outp
             , tm {{ (`outsz : [64]) }}
             , tm cstm
@@ -51,8 +51,8 @@ let shake256_spec outsz insz = do {
             , tm {{ `insz:[64] }}
             ];
     };
-    out <- crucible_fresh_var "out" (llvm_array outsz char_t);
-    crucible_points_to outp (tm out);
+    out <- llvm_fresh_var "out" (llvm_array outsz char_t);
+    llvm_points_to outp (tm out);
 };
 
 
