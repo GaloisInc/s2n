@@ -206,9 +206,9 @@ let generate_sparse_rep_loop_spec weight len padded_len = do {
 ///////////////////////////////////////////////////////////////////////////////
 // Proof commands
 
-get_rand_mod_len_loop_ov <- admit "__breakpoint__get_rand_mod_len_loop#get_rand_mod_len"
+get_rand_mod_len_loop_ov <- admit "__cutpoint__get_rand_mod_len_loop#get_rand_mod_len"
   [] get_rand_mod_len_loop_spec;
-verify "__breakpoint__get_rand_mod_len_loop#get_rand_mod_len"
+verify "__cutpoint__get_rand_mod_len_loop#get_rand_mod_len"
   [ get_rand_mod_len_loop_ov
   , aes_ctr_prf_4_ov
   ]
@@ -227,9 +227,9 @@ sample_uniform_r_bits_ov <- verify "sample_uniform_r_bits"
   sample_uniform_r_bits_spec;
 
 // NOTE: For generate_sparse_rep with T1 and N_BITS:
-secure_set_bits_T1_N_loop_ov <- admit breakpoint__secure_set_bits_loop []
+secure_set_bits_T1_N_loop_ov <- admit cutpoint__secure_set_bits_loop []
   (secure_set_bits_loop_spec N_PADDED_QW T1);
-verify breakpoint__secure_set_bits_loop
+verify cutpoint__secure_set_bits_loop
   [ secure_set_bits_T1_N_loop_ov
   , secure_cmp32_ov
   ]
@@ -239,9 +239,9 @@ secure_set_bits_T1_N_ov <- verify secure_set_bits_fun_name
   (secure_set_bits_spec N_PADDED_QW T1);
 
 // NOTE: For generate_sparse_rep with DV and R_BITS:
-secure_set_bits_DV_R_loop_ov <- admit breakpoint__secure_set_bits_loop []
+secure_set_bits_DV_R_loop_ov <- admit cutpoint__secure_set_bits_loop []
   (secure_set_bits_loop_spec R_PADDED_QW DV);
-verify breakpoint__secure_set_bits_loop
+verify cutpoint__secure_set_bits_loop
   [ secure_set_bits_DV_R_loop_ov
   , secure_cmp32_ov
   ]
@@ -252,9 +252,9 @@ secure_set_bits_DV_R_ov <- verify secure_set_bits_fun_name
 
 enable_crucible_assert_then_assume;
 
-generate_sparse_rep_T1_N_loop_ov <- admit breakpoint__generate_sparse_rep_loop
+generate_sparse_rep_T1_N_loop_ov <- admit cutpoint__generate_sparse_rep_loop
   [] (generate_sparse_rep_loop_spec T1 N_BITS N_PADDED_SIZE);
-verify_pathsat breakpoint__generate_sparse_rep_loop
+verify_pathsat cutpoint__generate_sparse_rep_loop
   [ generate_sparse_rep_T1_N_loop_ov
   , get_rand_mod_len_ov
   , secure_set_bits_T1_N_ov
@@ -264,9 +264,9 @@ generate_sparse_rep_T1_N_ov <- verify_pathsat generate_sparse_rep_fun_name
   [generate_sparse_rep_T1_N_loop_ov]
   (generate_sparse_rep_spec T1 N_BITS N_PADDED_SIZE);
 
-generate_sparse_rep_DV_R_loop_ov <- admit breakpoint__generate_sparse_rep_loop
+generate_sparse_rep_DV_R_loop_ov <- admit cutpoint__generate_sparse_rep_loop
   [] (generate_sparse_rep_loop_spec DV R_BITS R_PADDED_SIZE);
-verify_pathsat breakpoint__generate_sparse_rep_loop
+verify_pathsat cutpoint__generate_sparse_rep_loop
   [ generate_sparse_rep_DV_R_loop_ov
   , get_rand_mod_len_ov
   , secure_set_bits_DV_R_ov

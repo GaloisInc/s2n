@@ -1,5 +1,5 @@
 13a14,15
-> extern void __breakpoint__secure_set_bits_loop(uint64_t**, const idx_t**, const uint32_t*, const uint32_t*, uint64_t (*)[MAX_WEIGHT], uint64_t (*)[MAX_WEIGHT], uint64_t*, uint32_t*, uint32_t*, uint64_t*) __attribute__((noduplicate));
+> extern void __cutpoint__secure_set_bits_loop(uint64_t**, const idx_t**, const uint32_t*, const uint32_t*, uint64_t (*)[MAX_WEIGHT], uint64_t (*)[MAX_WEIGHT], uint64_t*, uint32_t*, uint32_t*, uint64_t*) __attribute__((noduplicate));
 > 
 20a23,25
 >   uint32_t qw, j;
@@ -16,7 +16,7 @@
 41c46
 <     for(uint32_t j = 0; j < weight; j++)
 ---
->     for(j = 0; __breakpoint__secure_set_bits_loop(&a, &wlist, &a_len_bytes, &weight, &qw_pos, &bit_pos, &tmp, &qw, &j, &mask), j < weight; j++)
+>     for(j = 0; __cutpoint__secure_set_bits_loop(&a, &wlist, &a_len_bytes, &weight, &qw_pos, &bit_pos, &tmp, &qw, &j, &mask), j < weight; j++)
 43c48
 <       uint64_t mask = (-1ULL) + (!secure_cmp32(qw_pos[j], qw));
 ---
